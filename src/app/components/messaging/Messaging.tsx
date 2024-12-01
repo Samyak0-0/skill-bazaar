@@ -1,11 +1,13 @@
-import React from 'react'
+import React from "react";
 
-type Props = {}
+type Props = {};
 
 const Messaging = (props: Props) => {
   return (
-    <div>Messaging Component</div>
-  )
-}
+    <div>
+      <h1>Messaging Component</h1>
+    </div>
+  );
+};
 
-export default Messaging
+export default Messaging;
