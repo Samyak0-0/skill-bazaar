@@ -2,10 +2,10 @@ import React from 'react'
 
 type Props = {}
 
-const Home = (props: Props) => {
+const Home_page = (props: Props) => {
   return (
-    <div>Home</div>
+    <div><h1>Home page</h1></div>
   )
 }
 
-export default Home
+export default Home_page
