@@ -1,11 +1,14 @@
-import React from 'react'
+import Messaging from "@/components/messaging/Messaging";
+import React from "react";
 
-type Props = {}
+type Props = {};
 
-const Messaging = (props: Props) => {
+const MessagingPage = (props: Props) => {
   return (
-    <div>Messaging Component</div>
-  )
-}
+    <>
+      <Messaging />
+    </>
+  );
+};
 
-export default Messaging
+export default MessagingPage;

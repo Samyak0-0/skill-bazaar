@@ -1,11 +1,14 @@
-import React from 'react'
+import Order from "@/components/order/Order";
+import React from "react";
 
-type Props = {}
+type Props = {};
 
-const Order = (props: Props) => {
+const OrderPage = (props: Props) => {
   return (
-    <div>Order Component</div>
-  )
-}
+    <>
+      <Order />
+    </>
+  );
+};
 
-export default Order
+export default OrderPage;

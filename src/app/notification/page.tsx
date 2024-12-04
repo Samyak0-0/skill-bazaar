@@ -1,11 +1,14 @@
-import React from 'react'
+import Notification from "@/components/notification_cmt/Notification";
+import React from "react";
 
-type Props = {}
+type Props = {};
 
-const Notification = (props: Props) => {
+const NotificationPage = (props: Props) => {
   return (
-    <div>Notification Component</div>
-  )
-}
+    <>
+      <Notification />
+    </>
+  );
+};
 
-export default Notification
+export default NotificationPage;

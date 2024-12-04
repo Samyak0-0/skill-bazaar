@@ -1,13 +1,14 @@
+import User_profile from "@/components/user_profile/User_profile";
 import React from "react";
 
 interface Props {}
 
-const User_profile = (props: Props) => {
+const UserProfilePage = (props: Props) => {
   return (
-    <div>
-      <h2> User profile</h2>
-    </div>
+    <>
+      <User_profile />
+    </>
   );
 };
 
-export default User_profile;
+export default UserProfilePage;
