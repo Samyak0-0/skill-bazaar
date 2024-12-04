@@ -1,11 +1,10 @@
-import React from 'react'
+// src/components/home_page/Home_page.tsx
+import React from 'react';
 
-type Props = {}
+type Props = {};
 
-const Home = (props: Props) => {
-  return (
-    <div>Home</div>
-  )
-}
+const Home_page = (props: Props) => {
+  return <div>Home</div>;
+};
 
-export default Home
+export default Home_page;
