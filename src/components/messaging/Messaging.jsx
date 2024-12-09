@@ -30,13 +30,13 @@ export default function Messaging() {
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "1rem" }}>
+    <div style={{ margin: "0 auto", padding: "1rem", color: "#000000", backgroundColor: "lightblue", width: "100%" }}>
       <div
         style={{
           border: "1px solid #ccc",
           borderRadius: "8px",
           padding: "1rem",
-          height: "400px",
+          height: "75vh",
           overflowY: "auto",
           marginBottom: "1rem",
         }}
@@ -50,7 +50,7 @@ export default function Messaging() {
           </div>
         ))}
       </div>
-      <div style={{ display: "flex", gap: "0.5rem" }}>
+      <div style={{ display: "flex", gap: "0.5rem", }}>
         <input
           type="text"
           value={input}

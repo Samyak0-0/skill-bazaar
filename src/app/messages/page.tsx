@@ -5,10 +5,10 @@ type Props = {};
 
 const MessagingPage = (props: Props) => {
   return (
-    <>
-      <Messaging />
+    <div className="bg-red-100 w-full h-[90vh] flex">
       <ContactSection />
-    </>
+      <Messaging />
+    </div>
   );
 };
 
