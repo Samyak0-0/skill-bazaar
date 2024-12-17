@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/bgrem.png";
 import Link from "next/link"; // Import Link from Next.js
 import { MessageIcon, NotificationIcon, ProfileIcon } from "./NavbarIcons";
 
