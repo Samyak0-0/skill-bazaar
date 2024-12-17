@@ -13,13 +13,13 @@ const Navbar = (props: Props) => {
         <img src={logo.src} alt="Logo" className="h-12 w-auto" />
         <Link
           href="/"
-          className="text-lg font-medium hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg transition-all duration-300"
+          className="text-lg font-medium hover:bg-gray-400 hover:text-white px-4 py-2 rounded-lg transition-all duration-300"
         >
           Home
         </Link>
         <Link
           href="/order"
-          className="text-lg font-medium hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg transition-all duration-300"
+          className="text-lg font-medium hover:bg-gray-400 hover:text-white px-4 py-2 rounded-lg transition-all duration-300"
         >
           Order
         </Link>
@@ -28,19 +28,19 @@ const Navbar = (props: Props) => {
       {/* Right Section: Icons */}
       <div className="flex items-center space-x-4">
         <Link href="/messages">
-          <button className="p-2 rounded-full hover:bg-blue-600 focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110">
+          <button className="p-2 rounded-full hover:bg-gray-400 focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110">
             <MessageIcon className="h-7 w-7" />
           </button>
         </Link>
 
         <Link href="/notification">
-          <button className="p-2 rounded-full hover:bg-blue-600 focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110">
+          <button className="p-2 rounded-full hover:bg-gray-400 focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110">
             <NotificationIcon className="h-7 w-7" />
           </button>
         </Link>
 
         <Link href="/profile">
-          <button className="p-2 rounded-full hover:bg-blue-600 focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110">
+          <button className="p-2 rounded-full hover:bg-gray-400 focus:outline-none transition-transform duration-200 ease-in-out transform hover:scale-110">
             <ProfileIcon className="h-7 w-7" />
           </button>
         </Link>
