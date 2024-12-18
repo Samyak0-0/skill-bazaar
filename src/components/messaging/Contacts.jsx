@@ -14,10 +14,12 @@ const ContactSection = () => {
       <div>
         {Contacts.map((indiv) => {
           return (
-            <ContactIndividuals
-              userId={indiv.userId}
-              username={indiv.username}
-            />
+            <div key={indiv.userId}>
+              <ContactIndividuals
+                userId={indiv.userId}
+                username={indiv.username}
+              />
+            </div>
           );
         })}
       </div>
