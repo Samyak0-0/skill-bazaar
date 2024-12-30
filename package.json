@@ -12,13 +12,9 @@
     "@prisma/client": "^6.0.1",
     "axios": "^1.7.9",
     "express": "^4.21.2",
-<<<<<<< HEAD
     "next": "15.0.3",
     "next-auth": "^4.24.11",
-=======
     "lucide-react": "^0.469.0",
-    "next": "^15.1.0",
->>>>>>> 2865af6c12b9960e0a6c54d0607851a590ad1dd6
     "prisma": "^6.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
