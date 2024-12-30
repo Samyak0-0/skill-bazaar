@@ -12,17 +12,12 @@
     "@prisma/client": "^6.0.1",
     "axios": "^1.7.9",
     "express": "^4.21.2",
-<<<<<<< HEAD
     "next": "15.0.3",
     "next-auth": "^4.24.11",
-=======
-    "next": "^15.1.0",
->>>>>>> 2865af6c12b9960e0a6c54d0607851a590ad1dd6
     "prisma": "^6.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
-    "react-messenger-chat-plugin": "^3.0.5",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
   },
