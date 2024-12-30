@@ -12,6 +12,7 @@
     "@prisma/client": "^6.0.1",
     "axios": "^1.7.9",
     "express": "^4.21.2",
+    "lucide-react": "^0.469.0",
     "next": "^15.1.0",
     "prisma": "^6.0.1",
     "react": "^19.0.0",
