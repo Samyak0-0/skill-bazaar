@@ -31,6 +31,33 @@ export default function OrderCard({ username, skill, work, status, date, reviews
   );
 }
 
+export function OrderList({ orders }) {
+  return (
+    <div style={styles.container}>
+      {/* Tabs */}
+      <div style={styles.tabContainer}>
+        <div style={{ ...styles.tab, ...styles.activeTab }}>Sold by</div>
+        <div style={styles.tab}>Bought by</div>
+      </div>
+
+
+    
+        {orders.map((order, index) => (
+          <OrderCard
+            key={index}
+            username={order.username}
+            skill={order.skill}
+            work={order.work}
+            status={order.status}
+            date={order.date}
+            reviews={order.reviews}
+          />
+        ))}
+      </div>
+    
+  );
+}
+
 const styles = {
   cardContainer: {
     display: "flex",
@@ -43,7 +70,7 @@ const styles = {
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
   },
   cardHover: {
-    transform: "scale(1.05)", // Slightly expand the card
+    transform: "scale(1.015)", // Slightly expand the card
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)", // Increase shadow depth
   },
   profileSection: {

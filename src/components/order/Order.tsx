@@ -31,7 +31,9 @@ export default function Orders() {
 
       {/* Tab Content */}
       <div style={styles.tabContent}>
-        {activeTab === "sold" ? <Sold /> : <Bought />}
+        <div style={styles.cardContainer}>
+          {activeTab === "sold" ? <Sold /> : <Bought />}
+        </div>
       </div>
     </div>
   );
@@ -39,10 +41,10 @@ export default function Orders() {
 
 const styles = {
   container: {
-    width: "90%",
-    margin: "30px auto",
+    backgroundColor: "#f9f9f9",
+    width: "98%",
+    margin: "10px auto",
     fontFamily: "Arial, sans-serif",
-    backgroundColor: "black",
     borderRadius: "12px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     overflow: "hidden",
@@ -52,6 +54,10 @@ const styles = {
     justifyContent: "center",
     backgroundColor: "#d1d5db",
     borderBottom: "1px solid #ddd",
+    borderRadius: "8px 8px 0 0",
+    position: "sticky"as"sticky", // Sticky position to keep the tabs fixed
+    top: 0,
+    zIndex: 2,
   },
   tabButton: {
     flex: 1,
@@ -70,7 +76,7 @@ const styles = {
     borderRadius: "8px 8px 0 0",
   },
   hoverTab: {
-    backgroundColor: "white", // Light gray for hover
+    backgroundColor: "#929292", // Light gray for hover
     color: "black", // White text on hover
   },
   tabContent: {
@@ -79,5 +85,11 @@ const styles = {
     backgroundColor: "#676767",
     textAlign: "center" as "center",
     borderRadius: "0 0 12px 12px",
+    maxHeight: "500px", // Fixed height for the content
+    overflowY: "auto"as"auto", // Enable vertical scroll
+    marginTop: "10px", // Ensure there's a gap between the tabs and content
+  },
+  cardContainer: {
+    padding: "10px",
   },
 };
