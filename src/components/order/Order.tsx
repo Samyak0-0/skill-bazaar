@@ -41,9 +41,9 @@ export default function Orders() {
 
 const styles = {
   container: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "black",
     width: "98%",
-    margin: "10px auto",
+    margin: "5px auto",
     fontFamily: "Arial, sans-serif",
     borderRadius: "12px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -80,16 +80,16 @@ const styles = {
     color: "black", // White text on hover
   },
   tabContent: {
-    padding: "20px",
+    padding: "10px",
     color: "#333",
-    backgroundColor: "#676767",
+    backgroundColor: "black",
     textAlign: "center" as "center",
     borderRadius: "0 0 12px 12px",
-    maxHeight: "500px", // Fixed height for the content
+    maxHeight: "530px", // Fixed height for the content
     overflowY: "auto"as"auto", // Enable vertical scroll
-    marginTop: "10px", // Ensure there's a gap between the tabs and content
+    marginTop: "1px", // Ensure there's a gap between the tabs and content
   },
   cardContainer: {
-    padding: "10px",
+    padding: "2px",
   },
 };
