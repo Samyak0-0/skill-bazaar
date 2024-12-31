@@ -1,6 +1,17 @@
+import React, { useState } from "react";
+
 export default function OrderCard({ username, skill, work, status, date, reviews }) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <div style={styles.cardContainer}>
+    <div
+      style={{
+        ...styles.cardContainer,
+        ...(isHovered ? styles.cardHover : {}),
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div style={styles.profileSection}>
         <div style={styles.avatar}>👤</div>
         <div>
@@ -29,6 +40,11 @@ const styles = {
     margin: "10px 0",
     borderRadius: "8px",
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  },
+  cardHover: {
+    transform: "scale(1.05)", // Slightly expand the card
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)", // Increase shadow depth
   },
   profileSection: {
     display: "flex",
