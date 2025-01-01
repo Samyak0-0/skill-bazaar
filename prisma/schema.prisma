@@ -13,69 +13,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id                 String  @id @default(cuid()) @map("_id")
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+ 
+model Session {
+  id           String   @id @default(cuid()) @map("_id")
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+ 
 model User {
-  id        String   @id @default(cuid()) @map("_id")
-  email     String   @unique
-  password  String
-  name      String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  buyerId  Int?
-  sellerId Int?
-  Buyer    Buyer?
-  Seller   Seller?
+  id            String    @id @default(cuid()) @map("_id")
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+ 
+model VerificationToken {
+  identifier String @id @map("_id")
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
 }
 
-model Buyer {
-  id     String  @id @default(cuid()) @map("_id")
-  user   User    @relation(fields: [userId], references: [id])
-  userId String  @unique
-  orders Order[]
-}
-
-model Seller {
-  id       String    @id @default(cuid()) @map("_id")
-  user     User      @relation(fields: [userId], references: [id])
-  userId   String    @unique
-  services Service[]
-  orders   Order[]   @relation("SellerOrders")
-}
-
-model Service {
-  id          String   @id @default(cuid()) @map("_id")
-  title       String
-  description String
-  price       Float
-  seller      Seller   @relation(fields: [sellerId], references: [id])
-  sellerId    String
-  orders      Order[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Order {
-  id        String      @id @default(cuid()) @map("_id")
-  service   Service     @relation(fields: [serviceId], references: [id])
-  serviceId String
-  buyer     Buyer       @relation(fields: [buyerId], references: [id])
-  buyerId   String
-  seller    Seller      @relation(fields: [sellerId], references: [id], name: "SellerOrders")
-  sellerId  String
-  status    OrderStatus @default(PENDING)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-}
-
-enum Role {
-  USER
-  BUYER
-  SELLER
-}
-
-enum OrderStatus {
-  PENDING
-  COMPLETED
-  CANCELLED
-}

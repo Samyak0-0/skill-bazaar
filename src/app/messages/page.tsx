@@ -4,24 +4,27 @@ import Messaging from "@/components/messaging/Messaging";
 import React from "react";
 import ContactSection from "@/components/messaging/Contacts";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import {MessagingContextProvider} from "@/provider/MessagingContext";
 
 type Props = {};
 
 const MessagingPage = (props: Props) => {
-  const { data } = useSession();
+  const { status} = useSession();
+  const router = useRouter();
 
-  if (data?.user?.name) {
-    return (
-      <div className="bg-red-100 w-full h-[90vh] flex">
-        <ContactSection />
-        <Messaging />
-      </div>
-    );
+  console.log(status);
+
+  if (status === "unauthenticated") {
+    router.push("/api/auth/signin");
   }
 
   return (
-    <div className="bg-red-100 w-full h-[90vh] flex text-5xl text-black">
-      LOGIN PLZZZ
+    <div className="bg-red-100 w-full h-[90vh] flex">
+      <MessagingContextProvider>
+        <ContactSection />
+        <Messaging />
+      </MessagingContextProvider>
     </div>
   );
 };
