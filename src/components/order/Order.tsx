@@ -6,36 +6,34 @@ import Bought from "./bought";
 
 export default function Orders() {
   const [activeTab, setActiveTab] = useState("sold");
+  const [hoveredTab, setHoveredTab] = useState<string | null>(null); // Add hovered state
 
   return (
     <div style={styles.container}>
       {/* Tabs */}
       <div style={styles.tabContainer}>
-        <button
-          style={
-            activeTab === "sold"
-              ? { ...styles.tabButton, ...styles.activeTab }
-              : styles.tabButton
-          }
-          onClick={() => setActiveTab("sold")}
-        >
-          Sold by
-        </button>
-        <button
-          style={
-            activeTab === "bought"
-              ? { ...styles.tabButton, ...styles.activeTab }
-              : styles.tabButton
-          }
-          onClick={() => setActiveTab("bought")}
-        >
-          Bought by
-        </button>
+        {["sold", "bought"].map((tab) => (
+          <button
+            key={tab}
+            style={{
+              ...styles.tabButton,
+              ...(activeTab === tab ? styles.activeTab : {}),
+              ...(hoveredTab === tab ? styles.hoverTab : {}),
+            }}
+            onClick={() => setActiveTab(tab)}
+            onMouseEnter={() => setHoveredTab(tab)} // Set hovered tab on mouse enter
+            onMouseLeave={() => setHoveredTab(null)} // Clear hovered tab on mouse leave
+          >
+            {tab === "sold" ? "Sold by" : "Bought by"}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content */}
       <div style={styles.tabContent}>
-        {activeTab === "sold" ? <Sold /> : <Bought />}
+        <div style={styles.cardContainer}>
+          {activeTab === "sold" ? <Sold /> : <Bought />}
+        </div>
       </div>
     </div>
   );
@@ -43,41 +41,55 @@ export default function Orders() {
 
 const styles = {
   container: {
-    width: "90%",
-    margin: "30px auto",
+    backgroundColor: "black",
+    width: "98%",
+    margin: "5px auto",
     fontFamily: "Arial, sans-serif",
-    backgroundColor: "black", // Light background
     borderRadius: "12px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Soft shadow
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
     overflow: "hidden",
   },
   tabContainer: {
     display: "flex",
     justifyContent: "center",
-    backgroundColor: "#d1d5db", // White background for tabs
-    borderBottom: "1px solid #ddd", // Subtle border
+    backgroundColor: "#d1d5db",
+    borderBottom: "1px solid #ddd",
+    borderRadius: "8px 8px 0 0",
+    position: "sticky"as"sticky", // Sticky position to keep the tabs fixed
+    top: 0,
+    zIndex: 2,
   },
   tabButton: {
     flex: 1,
     padding: "15px",
     cursor: "pointer",
     fontWeight: "bold",
-    color: "black", // Neutral color
+    color: "black",
     backgroundColor: "transparent",
     transition: "color 0.3s ease, background-color 0.3s ease",
     fontSize: "16px",
   },
   activeTab: {
-    color: "#fff", // White text for active tab
-    backgroundColor: "#616161", // Modern blue for active tab
-    borderBottom: "3px solid #dbdbdb", // Accent border for active tab
-    borderRadius: "8px 8px 0 0", // Smooth rounded corners on top
+    color: "#fff",
+    backgroundColor: "#616161",
+    borderBottom: "3px solid #dbdbdb",
+    borderRadius: "8px 8px 0 0",
+  },
+  hoverTab: {
+    backgroundColor: "#929292", // Light gray for hover
+    color: "black", // White text on hover
   },
   tabContent: {
-    padding: "20px",
+    padding: "10px",
     color: "#333",
-    backgroundColor: "#676767",
+    backgroundColor: "black",
     textAlign: "center" as "center",
     borderRadius: "0 0 12px 12px",
+    maxHeight: "530px", // Fixed height for the content
+    overflowY: "auto"as"auto", // Enable vertical scroll
+    marginTop: "1px", // Ensure there's a gap between the tabs and content
+  },
+  cardContainer: {
+    padding: "2px",
   },
 };
