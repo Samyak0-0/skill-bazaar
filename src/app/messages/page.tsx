@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Messaging from "@/components/messaging/Messaging";
 import React from "react";
@@ -8,13 +8,11 @@ import { useSession } from "next-auth/react";
 type Props = {};
 
 const MessagingPage = (props: Props) => {
+  const { data } = useSession();
 
-  const {data} = useSession();
-  
-  if(data?.user?.name) {
+  if (data?.user?.name) {
     return (
       <div className="bg-red-100 w-full h-[90vh] flex">
-        
         <ContactSection />
         <Messaging />
       </div>
