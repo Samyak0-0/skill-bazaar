@@ -5,13 +5,13 @@ import { NextResponse } from "next/server";
 export const GET = async (req) => {
   const { searchParams } = new URL(req.url);
 
-  const userId = searchParams.get("userid");
+  const userMail = searchParams.get("usermail");
 
   try {
     const users = await prisma.user.findMany({
       where: {
         NOT: {
-          id: userId,
+          email: userMail,
         },
       },
     });

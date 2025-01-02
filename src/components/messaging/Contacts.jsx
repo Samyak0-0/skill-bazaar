@@ -2,35 +2,41 @@
 
 import React, { useEffect, useState } from "react";
 import ContactIndividuals from "./ContactIndividuals";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useContext } from "react";
 import { MessagingContext } from "@/provider/MessagingContext";
 
 const ContactSection = () => {
   const [contacts, setContacts] = useState([]);
-  const { setSelectedContact } = useContext(MessagingContext);
+  const { selectedContact, setSelectedContact } = useContext(MessagingContext);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchContacts = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:3000/api/contacts?userid=asdasdasd",
-          {
-            cache: "no-store",
+        if (session?.user?.email) {
+          const res = await fetch(
+            `http://localhost:3000/api/contacts?usermail=${session.user.email}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+          if (!res.ok) {
+            throw new Error("Failed to fetch contacts");
           }
-        );
-        if (!res.ok) {
-          throw new Error("Failed to fetch contacts");
+          const data = await res.json();
+          setContacts(data);
         }
-        const data = await res.json();
-        setContacts(data);
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchContacts();
-  }, []);
+    if (session) {
+      fetchContacts();
+    }
+  }, [session]);
 
   return (
     <div className=" text-white bg-gray-700 w-1/3 max-w-[300px] min-w-[225px] ">
@@ -38,14 +44,13 @@ const ContactSection = () => {
       <div className="">
         {contacts?.map((indiv) => {
           return (
-            <div
-              key={indiv.id}
-              onClick={() => setSelectedContact("lorem ipsum")}
-            >
+            <div key={indiv.id} onClick={() => setSelectedContact(indiv.email)}>
               <ContactIndividuals
                 userId={indiv.id}
                 username={indiv.name}
                 imgurl={indiv.image}
+                email={indiv.email}
+                selectedContact={selectedContact}
               />
             </div>
           );

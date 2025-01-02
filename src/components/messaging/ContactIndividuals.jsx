@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const ContactIndividuals = ({
   userId,
-  onClickk,
+  email,
   selectedContact,
   username,
   online,
@@ -12,7 +12,7 @@ const ContactIndividuals = ({
     <div
       className={
         "  flex items-center cursor-pointer relative" +
-        (userId === selectedContact ? " bg-neutral-600" : "")
+        (email === selectedContact ? " bg-neutral-600" : "")
       }
       key={userId}
     >
