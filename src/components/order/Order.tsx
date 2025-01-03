@@ -5,29 +5,30 @@ import Sold from "./sold";
 import Bought from "./bought";
 
 export default function Orders() {
-  const [activeTab, setActiveTab] = useState("sold");
-  const [hoveredTab, setHoveredTab] = useState<string | null>(null); // Add hovered state
+  const [activeTab, setActiveTab] = useState<"sold" | "bought">("sold");
+  const [hoveredTab, setHoveredTab] = useState<"sold" | "bought" | null>(null);
 
   return (
     <div style={styles.container}>
       {/* Tabs */}
       <div style={styles.tabContainer}>
-        {["sold", "bought"].map((tab) => (
-          <button
-            key={tab}
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === tab ? styles.activeTab : {}),
-              ...(hoveredTab === tab ? styles.hoverTab : {}),
-            }}
-            onClick={() => setActiveTab(tab)}
-            onMouseEnter={() => setHoveredTab(tab)} // Set hovered tab on mouse enter
-            onMouseLeave={() => setHoveredTab(null)} // Clear hovered tab on mouse leave
-          >
-            {tab === "sold" ? "Sold by" : "Bought by"}
-          </button>
-        ))}
+      {["sold", "bought"].map((tab) => (
+      <button
+        key={tab}
+        style={{
+        ...styles.tabButton,
+        ...(activeTab === tab ? styles.activeTab : {}),
+        ...(hoveredTab === tab ? styles.hoverTab : {}),
+      }}
+      onClick={() => setActiveTab(tab as "sold" | "bought")}
+      onMouseEnter={() => setHoveredTab(tab as "sold" | "bought")}
+      onMouseLeave={() => setHoveredTab(null)}
+      >
+      {tab === "sold" ? "Sold by" : "Bought by"}
+      </button>
+      ))}
       </div>
+
 
       {/* Tab Content */}
       <div style={styles.tabContent}>
@@ -55,7 +56,7 @@ const styles = {
     backgroundColor: "#d1d5db",
     borderBottom: "1px solid #ddd",
     borderRadius: "8px 8px 0 0",
-    position: "sticky"as"sticky", // Sticky position to keep the tabs fixed
+    position: "sticky" as "sticky",
     top: 0,
     zIndex: 2,
   },
@@ -76,8 +77,8 @@ const styles = {
     borderRadius: "8px 8px 0 0",
   },
   hoverTab: {
-    backgroundColor: "#929292", // Light gray for hover
-    color: "black", // White text on hover
+    backgroundColor: "#929292",
+    color: "black",
   },
   tabContent: {
     padding: "10px",
@@ -85,9 +86,9 @@ const styles = {
     backgroundColor: "black",
     textAlign: "center" as "center",
     borderRadius: "0 0 12px 12px",
-    maxHeight: "530px", // Fixed height for the content
-    overflowY: "auto"as"auto", // Enable vertical scroll
-    marginTop: "1px", // Ensure there's a gap between the tabs and content
+    maxHeight: "530px",
+    overflowY: "auto" as "auto",
+    marginTop: "1px",
   },
   cardContainer: {
     padding: "2px",
