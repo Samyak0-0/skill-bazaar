@@ -3,7 +3,8 @@
 import { MessagingContext } from "@/provider/MessagingContext";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useContext } from "react";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
+// import {socket} from "../../app/socket"
 
 const socket = io("http://localhost:3001"); // Replace with your server URL
 
@@ -27,12 +28,27 @@ export default function Messaging() {
 
   const sendMessage = () => {
     if (input.trim()) {
-      const message = { text: input, sender: "You", timestamp: new Date() };
-      socket.emit("message", message); // Send message to the server
+      const message = {
+        text: input,
+        sender: data.user.name,
+        recipient: "",
+        timestamp: new Date(),
+      };
+      socket.emit("sendMessage", message); // Send message to the server
       setMessages((prevMessages) => [...prevMessages, message]);
       setInput(""); // Clear the input field
     }
   };
+
+  useEffect(() => {
+    socket.on("receiveMessage", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  });
 
   return (
     <div
@@ -64,15 +80,17 @@ export default function Messaging() {
             }}
           >
             {messages.map((msg, index) => (
-              <div key={index} className="flex flex-col items-end mb-4">
-                <div className="bg-blue-500 rounded-md px-5 py-2 text-white text-xl">
-                  {msg.text}
-                </div>
-                <div style={{ fontSize: "0.8rem", color: "#000000" }}>
-                  {new Date(msg.timestamp).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+              <div key={index}>
+                <div className={`flex flex-col ${msg.sender === data.user.name ? "items-end" : "items-start"} mb-4`}>
+                  <div className={`${msg.sender === data.user.name ? "bg-blue-500" : "bg-slate-500"} rounded-md px-5 py-2 text-white text-xl`}>
+                    {msg.text}
+                  </div>
+                  <div style={{ fontSize: "0.8rem", color: "#000000" }}>
+                    {new Date(msg.timestamp).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
                 </div>
               </div>
             ))}

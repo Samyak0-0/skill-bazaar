@@ -97,4 +97,5 @@ model Messages {
   recipient String
   text      String
   file      String?
+  dateSent  DateTime
 }
