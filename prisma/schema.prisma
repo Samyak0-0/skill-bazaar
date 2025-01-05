@@ -56,6 +56,8 @@ model User {
   buyerOrders Order[] @relation("BuyerOrders")
 
   sellerOrders Order[] @relation("SellerOrders")
+
+  messages Messages[] @relation("UserMessages")
 }
 
 model VerificationToken {
@@ -92,10 +94,12 @@ model Order {
 }
 
 model Messages {
-  id        String  @id @default(cuid()) @map("_id")
-  sender    String
-  recipient String
-  text      String
-  file      String?
-  dateSent  DateTime
+  id         String  @id @default(cuid()) @map("_id")
+  senderId    String
+  recipientId String
+  text       String
+  file       String?
+  dateSent   DateTime
+
+  sender User @relation("UserMessages", fields: [senderId], references: [id])
 }
