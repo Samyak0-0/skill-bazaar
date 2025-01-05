@@ -1,5 +1,5 @@
 import { getAuthSession } from "@/utilities/auth";
-import {prisma} from "@/utilities/prisma";
+import { prisma } from "@/utilities/prisma";
 import { NextResponse } from "next/server";
 
 export const GET = async (req) => {
@@ -9,16 +9,14 @@ export const GET = async (req) => {
 
   try {
     const users = await prisma.user.findMany({
-      where: {
-        NOT: {
-          email: userMail,
-        },
-      },
+      // where: {
+      //   NOT: {
+      //     email: userMail,
+      //   },
+      // },
     });
-
     return new NextResponse(JSON.stringify(users, { status: 200 }));
   } catch (err) {
-    // console.log(err);
     return new NextResponse(
       JSON.stringify({ message: "Something went wrong!" }, { status: 500 })
     );

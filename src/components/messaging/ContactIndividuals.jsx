@@ -12,7 +12,7 @@ const ContactIndividuals = ({
     <div
       className={
         "  flex items-center cursor-pointer relative" +
-        (email === selectedContact ? " bg-neutral-600" : "")
+        (userId === selectedContact ? " bg-neutral-600" : "")
       }
       key={userId}
     >
