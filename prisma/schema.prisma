@@ -103,7 +103,6 @@ model Messages {
 
 }
 
-<<<<<<< HEAD
 model Notification {
   id        String   @id @default(cuid()) @map("_id")
   userId    String
@@ -115,9 +114,3 @@ model Notification {
   
   user      User     @relation(fields: [userId], references: [id])
 }
-
-
-
-=======
-// sender User @relation("UserMessages", fields: [senderId], references: [id])
->>>>>>> 0848959bdf5993e243d625d47af54d209519fb2a
