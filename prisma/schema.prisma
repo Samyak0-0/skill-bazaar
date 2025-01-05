@@ -57,8 +57,8 @@ model User {
 
   sellerOrders Order[] @relation("SellerOrders")
 
-  messages Messages[] @relation("UserMessages")
 }
+//  messages Messages[] @relation("UserMessages")
 
 model VerificationToken {
   identifier String   @id @map("_id")
@@ -99,11 +99,11 @@ model Messages {
   recipientId String
   text       String
   file       String?
-  dateSent   DateTime
+  timestamp  DateTime
 
-  sender User @relation("UserMessages", fields: [senderId], references: [id])
 }
 
+<<<<<<< HEAD
 model Notification {
   id        String   @id @default(cuid()) @map("_id")
   userId    String
@@ -118,3 +118,6 @@ model Notification {
 
 
 
+=======
+// sender User @relation("UserMessages", fields: [senderId], references: [id])
+>>>>>>> 0848959bdf5993e243d625d47af54d209519fb2a
