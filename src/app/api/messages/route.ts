@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         senderId,
         recipientId,
         text,
-        timestamp: new Date(),
+        timestamp,
       },
     });
 

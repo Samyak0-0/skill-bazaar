@@ -100,7 +100,6 @@ model Messages {
   text       String
   file       String?
   timestamp  DateTime
-
 }
 
 // sender User @relation("UserMessages", fields: [senderId], references: [id])

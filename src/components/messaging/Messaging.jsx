@@ -32,6 +32,7 @@ export default function Messaging() {
         senderId: userId,
         recipientId: selectedContact,
         text: input,
+        timestamp: new Date(),
       };
 
       try {
@@ -71,7 +72,7 @@ export default function Messaging() {
       if (selectedContact) {
         try {
           const res = await fetch(
-            `http://localhost:3000/messages/${selectedContact}`
+            `http://localhost:3000/api/messages/${selectedContact}`
           );
           if (res.ok) {
             const data = await res.json();
