@@ -6,9 +6,10 @@ export const MessagingContext = createContext();
 export const MessagingContextProvider = ({ children }) => {
     
   const [selectedContact, setSelectedContact] = useState("");
+  const [userId, setUserId] = useState("")
 
   return (
-    <MessagingContext.Provider value={{ selectedContact, setSelectedContact }}>
+    <MessagingContext.Provider value={{ selectedContact, setSelectedContact, userId, setUserId }}>
       {children}
     </MessagingContext.Provider>
   );

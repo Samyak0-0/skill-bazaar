@@ -8,7 +8,8 @@ import { MessagingContext } from "@/provider/MessagingContext";
 
 const ContactSection = () => {
   const [contacts, setContacts] = useState([]);
-  const { selectedContact, setSelectedContact } = useContext(MessagingContext);
+  const { selectedContact, setSelectedContact, setUserId } =
+    useContext(MessagingContext);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -27,6 +28,11 @@ const ContactSection = () => {
           }
           const data = await res.json();
           setContacts(data);
+
+          const userContact = data.find((e) => e.email === session.user.email);
+          if (userContact) {
+            setUserId(userContact.id);
+          }
         }
       } catch (error) {
         console.error(error);
@@ -44,15 +50,17 @@ const ContactSection = () => {
       <div className="">
         {contacts?.map((indiv) => {
           return (
-            <div key={indiv.id} onClick={() => setSelectedContact(indiv.email)}>
-              <ContactIndividuals
-                userId={indiv.id}
-                username={indiv.name}
-                imgurl={indiv.image}
-                email={indiv.email}
-                selectedContact={selectedContact}
-              />
-            </div>
+            indiv?.email != session.user.email && (
+              <div key={indiv.id} onClick={() => setSelectedContact(indiv.id)}>
+                <ContactIndividuals
+                  userId={indiv.id}
+                  username={indiv.name}
+                  imgurl={indiv.image}
+                  email={indiv.email}
+                  selectedContact={selectedContact}
+                />
+              </div>
+            )
           );
         })}
       </div>
