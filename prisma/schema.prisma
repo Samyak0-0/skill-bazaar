@@ -12,3 +12,121 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model Account {
+  id                String  @id @default(cuid()) @map("_id")
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid()) @map("_id")
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid()) @map("_id")
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  Notification  Notification[]
+  contacts      String[]
+
+  services      Service[] @relation("UserServices")
+  buyerOrders   Order[]   @relation("BuyerOrders")
+  sellerOrders  Order[]   @relation("SellerOrders")
+
+  reviews       Review[]  @relation("UserReviews")
+}
+
+//  messages Messages[] @relation("UserMessages")
+
+model VerificationToken {
+  identifier String   @id @map("_id")
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Service {
+  id       String  @id @default(cuid()) @map("_id")
+  name     String
+  rate     Float
+  sellerId String
+  seller   User    @relation("UserServices", fields: [sellerId], references: [id])
+  orders   Order[] @relation("ServiceOrders")
+}
+
+model Review {
+  id          String   @id @default(cuid()) @map("_id")
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  reviewerId  String
+  reviewer    User     @relation("UserReviews", fields: [reviewerId], references: [id])
+  rating      Int
+  comment     String
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+  @@index([reviewerId])
+}
+
+model Order {
+  id        String   @id @default(cuid()) @map("_id")
+  serviceId String
+  buyerId   String
+  sellerId  String
+  status    String
+  createdAt DateTime @default(now())
+  reviews   Review[]
+
+  service   Service  @relation("ServiceOrders", fields: [serviceId], references: [id])
+  buyer     User     @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller    User     @relation("SellerOrders", fields: [sellerId], references: [id])
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([serviceId])
+}
+
+model Messages {
+  id         String  @id @default(cuid()) @map("_id")
+  senderId    String
+  recipientId String
+  text       String
+  file       String?
+  timestamp  DateTime
+
+}
+
+model Notification {
+  id        String   @id @default(cuid()) @map("_id")
+  userId    String
+  message   String
+  type      String
+  isRead    Boolean  @default(false)
+  link      String?
+  date      DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+}

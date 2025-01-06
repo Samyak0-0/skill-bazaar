@@ -1,27 +1,74 @@
-import React from "react";
-import ContactIndividuals from "./ContactIndividuals";
+"use client";
 
-const Contacts = [
-  { userId: 1234, username: "Hari" },
-  { userId: 12345, username: "Shyam" },
-  { userId: 12346, username: "Ram" },
-];
+import React, { useEffect, useState } from "react";
+import ContactIndividuals from "./ContactIndividuals";
+import { signOut, useSession } from "next-auth/react";
+import { useContext } from "react";
+import { MessagingContext } from "@/provider/MessagingContext";
 
 const ContactSection = () => {
+  const [contacts, setContacts] = useState([]);
+  const { selectedContact, setSelectedContact, setUserId } =
+    useContext(MessagingContext);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        if (session?.user?.email) {
+          const res = await fetch(
+            `http://localhost:3000/api/contacts?usermail=${session.user.email}`,
+            {
+              cache: "no-store",
+            }
+          );
+
+          if (!res.ok) {
+            throw new Error("Failed to fetch contacts");
+          }
+          const data = await res.json();
+          setContacts(data);
+
+          const userContact = data.find((e) => e.email === session.user.email);
+          if (userContact) {
+            setUserId(userContact.id);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (session) {
+      fetchContacts();
+    }
+  }, [session]);
+
   return (
     <div className=" text-white bg-gray-700 w-1/3 max-w-[300px] min-w-[225px] ">
-      <h1 className=" text-3xl my-3 ml-3">Contacts</h1>
-      <div>
-        {Contacts.map((indiv) => {
+      <div className=" text-3xl mt-3 mb-4 ml-3">Contacts</div>
+      <div className="">
+        {contacts?.map((indiv) => {
           return (
-            <div key={indiv.userId}>
-              <ContactIndividuals
-                userId={indiv.userId}
-                username={indiv.username}
-              />
-            </div>
+            indiv?.email != session.user.email && (
+              <div key={indiv.id} onClick={() => setSelectedContact(indiv.id)}>
+                <ContactIndividuals
+                  userId={indiv.id}
+                  username={indiv.name}
+                  imgurl={indiv.image}
+                  email={indiv.email}
+                  selectedContact={selectedContact}
+                />
+              </div>
+            )
           );
         })}
+      </div>
+      <div
+        className="bg-red-500 text-white px-4 py-2 rounded-lg cursor-pointer shadow-md text-center w-fit mx-auto my-5"
+        onClick={signOut}
+      >
+        Log Out
       </div>
     </div>
   );
