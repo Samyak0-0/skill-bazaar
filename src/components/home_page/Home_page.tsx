@@ -10,7 +10,7 @@ const Home_page = (props: Props) => {
 export default Home_page;
 */
 
-"use client";
+"use client";   // to show the client side code
 import React from 'react';
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -70,9 +70,9 @@ const Home_page = (props: Props) => {
   ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="pt-4 px-2 sm:px-4 lg:px-6 w-full max-w-[1350px] mx-auto">
       <div className="mb-8 relative">
-        <h2 className="text-3xl font-bold mb-4 text-white">Recommended</h2>
+        <h2 className="text-3xl font-bold mb-4 text-white pt-2">Recommended</h2>
         <div className="relative">
           <div 
             ref={scrollContainer}
