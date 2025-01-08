@@ -1,0 +1,33 @@
+.chatBox {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  width: 100%;
+  flex-grow: 1;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(136, 136, 136, 0.5) rgba(241, 241, 241, 0.3);
+}
+.chatBox::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chatBox::-webkit-scrollbar-track {
+  background: rgba(241, 241, 241, 0.3);
+  border-radius: 100px;
+}
+
+.chatBox::-webkit-scrollbar-thumb {
+  background: rgba(136, 136, 136, 0.5);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.chatBox::-webkit-scrollbar-thumb:hover {
+  background: rgba(136, 136, 136, 0.8);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
