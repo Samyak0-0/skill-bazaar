@@ -101,6 +101,11 @@ const Create_order = (props: Props) => {
             type="text"
             id="rate"
             value={formData.rate}
+            onBlur={(e) => {
+              if (!e.target.value.includes('$')) {
+              setFormData({ ...formData, rate: `${e.target.value}$/HR` });
+              }
+            }}
             onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
             placeholder="50$/HR"
             className="w-full p-2 border rounded-md text-black"
