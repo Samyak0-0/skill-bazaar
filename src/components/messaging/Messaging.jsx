@@ -2,9 +2,10 @@
 
 import { MessagingContext } from "@/provider/MessagingContext";
 import { useSession } from "next-auth/react";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { io } from "socket.io-client";
-// import {socket} from "../../app/socket"
+import styles from "./messaging.module.css";
+import { Send } from "lucide-react";
 
 const socket = io("http://localhost:3001"); // Replace with your server URL
 
@@ -13,18 +14,17 @@ export default function Messaging() {
   const [input, setInput] = useState("");
   const { data } = useSession();
 
-  const { selectedContact, setSelectedContact, userId } = useContext(MessagingContext);
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  // useEffect(() => {
-  //   // Listen for incoming messages
-  //   socket.on("message", (message) => {
-  //     setMessages((prevMessages) => [...prevMessages, message]);
-  //   });
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages])
 
-  //   return () => {
-  //     socket.off("message");
-  //   };
-  // }, []);
+  const { selectedContact, setSelectedContact, userId } =
+    useContext(MessagingContext);
 
   const sendMessage = async () => {
     if (input.trim()) {
@@ -72,7 +72,7 @@ export default function Messaging() {
       if (selectedContact) {
         try {
           const res = await fetch(
-            `http://localhost:3000/api/messages/${selectedContact}`
+            `http://localhost:3000/api/messages?userId=${userId}&contact=${selectedContact}`
           );
           if (res.ok) {
             const data = await res.json();
@@ -92,10 +92,11 @@ export default function Messaging() {
     <div
       style={{
         margin: "0 auto",
-        padding: "1rem",
         color: "#000000",
         backgroundColor: "lightblue",
         width: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       {!selectedContact && (
@@ -107,16 +108,7 @@ export default function Messaging() {
 
       {selectedContact && (
         <>
-          <div
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "1rem",
-              height: "75vh",
-              overflowY: "auto",
-              marginBottom: "1rem",
-            }}
-          >
+          <div className={styles.chatBox}>
             {messages.map((msg, index) => (
               <div key={index}>
                 <div
@@ -126,9 +118,7 @@ export default function Messaging() {
                 >
                   <div
                     className={`${
-                      msg.senderId === userId
-                        ? "bg-blue-500"
-                        : "bg-slate-500"
+                      msg.senderId === userId ? "bg-blue-500" : "bg-slate-500"
                     } rounded-md px-5 py-2 text-white text-xl`}
                   >
                     {msg.text}
@@ -142,8 +132,16 @@ export default function Messaging() {
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              margin: "0 1rem 1rem 1rem",
+              alignItems: "center",
+            }}
+          >
             <input
               type="text"
               value={input}
@@ -157,7 +155,7 @@ export default function Messaging() {
               placeholder="Type a message..."
             />
             <button onClick={sendMessage} style={{ padding: "0.5rem 1rem" }}>
-              Send
+              <Send size={25} color="white" />
             </button>
           </div>
         </>
