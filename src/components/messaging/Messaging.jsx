@@ -5,7 +5,16 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect, useContext, useRef } from "react";
 import { io } from "socket.io-client";
 import styles from "./messaging.module.css";
-import { Send } from "lucide-react";
+import { Send, Paperclip } from "lucide-react";
+import { app } from "@/utilities/firebase";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+
+// import multer from "multer";
 
 const socket = io("http://localhost:3001"); // Replace with your server URL
 
@@ -14,6 +23,11 @@ export default function Messaging() {
   const [input, setInput] = useState("");
   const { data } = useSession();
 
+  const [file, setFile] = useState(null);
+  const [media, setMedia] = useState("");
+
+  const { selectedContact, setSelectedContact, userId } =
+    useContext(MessagingContext);
   const messagesEndRef = useRef(null);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -21,20 +35,88 @@ export default function Messaging() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages])
+  }, [messages]);
 
-  const { selectedContact, setSelectedContact, userId } =
-    useContext(MessagingContext);
+  // useEffect(() => {
+  //   const storage = getStorage(app);
+  //   const upload = () => {
+  //     const name = new Date().getTime() + file.name;
+  //     const storageRef = ref(storage, name);
+
+  //     const uploadTask = uploadBytesResumable(storageRef, file);
+
+  //     uploadTask.on(
+  //       "state_changed",
+  //       (snapshot) => {
+  //         const progress =
+  //           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+  //         console.log("Upload is " + progress + "% done");
+  //         switch (snapshot.state) {
+  //           case "paused":
+  //             console.log("Upload is paused");
+  //             break;
+  //           case "running":
+  //             console.log("Upload is running");
+  //             break;
+  //         }
+  //       },
+  //       (error) => {},
+  //       () => {
+  //         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+  //           setMedia(downloadURL);
+  //         });
+  //       }
+  //     );
+  //   };
+  //   file && upload();
+  // }, [file]);
+
+  const uploadFile = async () => {
+    if (!file) return null;
+
+    const storage = getStorage(app);
+    const name = new Date().getTime() + file.name;
+    const storageRef = ref(storage, name);
+
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        null,
+        (error) => reject(error),
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        }
+      );
+    });
+  };
 
   const sendMessage = async () => {
-    if (input.trim()) {
-      const message = {
+    let message;
+    let fileURL = "";
+
+    if (file) {
+      try {
+        fileURL = await uploadFile();
+        setMedia(fileURL);
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        return;
+      }
+    }
+
+    if (input.trim() || fileURL) {
+      message = {
         senderId: userId,
         recipientId: selectedContact,
         text: input,
         timestamp: new Date(),
+        file: fileURL || null,
       };
-
+      console.log(message);
       try {
         const response = await fetch("http://localhost:3000/api/messages", {
           method: "POST",
@@ -48,6 +130,7 @@ export default function Messaging() {
           socket.emit("sendMessage", message);
           setMessages((prevMessages) => [...prevMessages, message]);
           setInput("");
+          setFile(null); // Clear file
         } else {
           console.error("Failed to send message:", response.status);
         }
@@ -56,6 +139,48 @@ export default function Messaging() {
       }
     }
   };
+
+  // const sendMessage = async () => {
+  //   let message;
+  //   if (input.trim()) {
+  //     if (media) {
+  //       message = {
+  //         senderId: userId,
+  //         recipientId: selectedContact,
+  //         text: input,
+  //         timestamp: new Date(),
+  //         file: media,
+  //       };
+  //     } else {
+  //       message = {
+  //         senderId: userId,
+  //         recipientId: selectedContact,
+  //         text: input,
+  //         timestamp: new Date(),
+  //       };
+  //     }
+
+  //     try {
+  //       const response = await fetch("http://localhost:3000/api/messages", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(message),
+  //       });
+
+  //       if (response.ok) {
+  //         socket.emit("sendMessage", message);
+  //         setMessages((prevMessages) => [...prevMessages, message]);
+  //         setInput("");
+  //       } else {
+  //         console.error("Failed to send message:", response.status);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error sending message:", error);
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     socket.on("receiveMessage", (msg) => {
@@ -123,6 +248,13 @@ export default function Messaging() {
                   >
                     {msg.text}
                   </div>
+                  {msg.file && (
+                    <img
+                      src={msg.file}
+                      alt="attachment"
+                      style={{ maxWidth: "200px", marginTop: "10px" }}
+                    />
+                  )}
                   <div style={{ fontSize: "0.8rem", color: "#000000" }}>
                     {new Date(msg.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -154,7 +286,20 @@ export default function Messaging() {
               }}
               placeholder="Type a message..."
             />
-            <button onClick={sendMessage} style={{ padding: "0.5rem 1rem" }}>
+            <div className="relative">
+              <input
+                type="file"
+                id="image"
+                onChange={(e) => setFile(e.target.files[0])}
+                className=""
+              />
+              <button className="p-2">
+                <label htmlFor="image">
+                  <Paperclip size={22} className="text-white cursor-pointer" />
+                </label>
+              </button>
+            </div>
+            <button onClick={sendMessage} style={{ padding: "0.5rem" }}>
               <Send size={25} color="white" />
             </button>
           </div>

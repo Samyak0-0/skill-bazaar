@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const data = await req.json();
   console.log(data);
-  const { senderId, recipientId, text, timestamp } = data;
+  const { senderId, recipientId, text, timestamp, file } = data;
 
   try {
     // Create a new message in the database using Prisma
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
         recipientId,
         text,
         timestamp,
+        file,
       },
     });
 
