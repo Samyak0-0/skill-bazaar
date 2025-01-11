@@ -26,10 +26,8 @@ export async function GET(req: NextRequest) {
           { senderId: contact, recipientId: userId },
         ],
       },
-      // orderBy: {
-      //   timestamp: "asc",
-      // },
     });
+    console.log(messages)
 
     if (!messages || messages.length === 0) {
       return NextResponse.json({ messages: [] }); // Handle case where no messages are found

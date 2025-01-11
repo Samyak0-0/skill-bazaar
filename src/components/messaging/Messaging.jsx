@@ -291,7 +291,7 @@ export default function Messaging() {
                 type="file"
                 id="image"
                 onChange={(e) => setFile(e.target.files[0])}
-                className=""
+                className="hidden"
               />
               <button className="p-2">
                 <label htmlFor="image">
