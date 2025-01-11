@@ -71,6 +71,10 @@ export default function Messaging() {
   //   file && upload();
   // }, [file]);
 
+  // useEffect(() => {
+  //   console.log(file)
+  // }, [file])
+
   const uploadFile = async () => {
     if (!file) return null;
 
@@ -213,6 +217,45 @@ export default function Messaging() {
     fetchMessages();
   }, [selectedContact]);
 
+  const isImageUrl = (URL, senderId, userId) => {
+    const cleanedUrl = URL.split("?")[0];
+
+    const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|svg|webp)$/i;
+
+    const fullFilename = cleanedUrl.substring(cleanedUrl.lastIndexOf("/") + 1);
+
+    const extractFileName = (filename) => {
+      const index = filename.search(/[^\d]/); // Find where numbers end
+      return filename.slice(index);
+    };
+
+    const filename = extractFileName(fullFilename);
+
+    if (imageExtensions.test(cleanedUrl)) {
+      return (
+        <a href={URL} target="_blank">
+          <img
+            src={URL}
+            alt="attachment"
+            style={{ width: "50vw", maxWidth: "500px", marginTop: "10px", borderRadius:"10px" }}
+          />
+        </a>
+      );
+    } else {
+      return (
+        <div
+          className={`${
+            senderId === userId ? "bg-blue-500" : "bg-slate-500"
+          } rounded-md px-5 py-2 text-white text-xl underline`}
+        >
+          <a href={URL} target="_blank">
+            {filename}
+          </a>
+        </div>
+      );
+    }
+  };
+
   return (
     <div
       style={{
@@ -241,20 +284,17 @@ export default function Messaging() {
                     msg.senderId === userId ? "items-end" : "items-start"
                   } mb-4`}
                 >
-                  <div
-                    className={`${
-                      msg.senderId === userId ? "bg-blue-500" : "bg-slate-500"
-                    } rounded-md px-5 py-2 text-white text-xl`}
-                  >
-                    {msg.text}
-                  </div>
-                  {msg.file && (
-                    <img
-                      src={msg.file}
-                      alt="attachment"
-                      style={{ maxWidth: "200px", marginTop: "10px" }}
-                    />
+                  {msg.text && (
+                    <div
+                      className={`${
+                        msg.senderId === userId ? "bg-blue-500" : "bg-slate-500"
+                      } rounded-md px-5 py-2 text-white text-xl`}
+                    >
+                      {msg.text}
+                    </div>
                   )}
+
+                  {msg.file && isImageUrl(msg.file, msg.senderId, userId)}
                   <div style={{ fontSize: "0.8rem", color: "#000000" }}>
                     {new Date(msg.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -266,42 +306,68 @@ export default function Messaging() {
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <div
-            style={{
-              display: "flex",
-              gap: "0.5rem",
-              margin: "0 1rem 1rem 1rem",
-              alignItems: "center",
-            }}
-          >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+          <div>
+            {file && (
+              <div
+                style={{
+                  backgroundColor: "#2c2c2c",
+                  color: "#ffffff",
+                  padding: "7px 0 7px 15px",
+                  borderRadius: "4px",
+                  fontSize: "0.9rem",
+                  maxWidth: "200px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  margin: "0 1rem 1rem 1rem",
+                  display: "flex",
+                  gap: "1rem",
+                }}
+              >
+                <Paperclip size={22} className="text-white cursor-pointer" />
+                {file.name}
+              </div>
+            )}
+            <div
               style={{
-                flex: 1,
-                padding: "0.5rem",
-                borderRadius: "4px",
-                color: "#000000",
+                display: "flex",
+                gap: "0.5rem",
+                margin: "0 1rem 1rem 1rem",
+                alignItems: "center",
               }}
-              placeholder="Type a message..."
-            />
-            <div className="relative">
+            >
               <input
-                type="file"
-                id="image"
-                onChange={(e) => setFile(e.target.files[0])}
-                className="hidden"
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: "0.5rem",
+                  borderRadius: "4px",
+                  color: "#000000",
+                }}
+                placeholder="Type a message..."
               />
-              <button className="p-2">
-                <label htmlFor="image">
-                  <Paperclip size={22} className="text-white cursor-pointer" />
-                </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  id="image"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  className="hidden"
+                />
+                <button className="p-2">
+                  <label htmlFor="image">
+                    <Paperclip
+                      size={22}
+                      className="text-white cursor-pointer"
+                    />
+                  </label>
+                </button>
+              </div>
+              <button onClick={sendMessage} style={{ padding: "0.5rem" }}>
+                <Send size={25} color="white" />
               </button>
             </div>
-            <button onClick={sendMessage} style={{ padding: "0.5rem" }}>
-              <Send size={25} color="white" />
-            </button>
           </div>
         </>
       )}
