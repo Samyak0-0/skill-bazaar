@@ -17,8 +17,8 @@
     "express": "^4.21.2",
     "lucide-react": "^0.469.0",
     "mongoose": "^8.9.3",
-    "next": "15.0.3",
-    "next-auth": "^4.24.11",
+    "next": "^15.1.4",
+    "next-auth": "^4.24.7",
     "prisma": "^6.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -36,5 +36,19 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "5.7.2"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Samyak0-0/skill-bazaar.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",  
+  "bugs": {
+    "url": "https://github.com/Samyak0-0/skill-bazaar/issues"
+  },
+  "homepage": "https://github.com/Samyak0-0/skill-bazaar#readme"
 }

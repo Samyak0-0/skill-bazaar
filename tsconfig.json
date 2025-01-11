@@ -1,27 +1,44 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true, // Allow JavaScript files
+    "skipLibCheck": true, // Skip library checks
+    "strict": true, // Enable all strict type-checking options
+    "noEmit": true, // Disable emitting of output files
+    "esModuleInterop": true, // Enable compatibility with CommonJS modules
+    "module": "ESNext", // Use ESNext module resolution
+    "moduleResolution": "Node", // Use Node-style module resolution
+    "resolveJsonModule": true, // Allow importing JSON modules
+    "isolatedModules": true, // Ensure modules are isolated
+    "jsx": "preserve", // Enable React JSX support for newer versions of React
+    "incremental": true, // Enable incremental compilation for faster builds
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ] // Set up path aliases for easy imports
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/messaging/Messaging.jsx", "src/utilities/auth.js", "src/utilities/prisma.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts", // Include all TypeScript files
+    "**/*.tsx", // Include all TypeScript React files
+    ".next/types/**/*.ts",
+    "src/components/messaging/**/*.tsx", // Ensure components are included if using TypeScript JSX
+    "src/utilities/**/*.ts", // Include all utilities as TypeScript files
+    "src/utilities/auth.ts", // Ensure auth file is treated as TypeScript
+    "src/utilities/prisma.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ] // Exclude node_modules to prevent unnecessary file checks
 }

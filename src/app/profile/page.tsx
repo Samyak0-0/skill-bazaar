@@ -13,7 +13,7 @@ const UserProfilePage = (props: Props) => {
   return (
     <>
       <User_profile 
-        initialName={userName} 
+        //initialName={userName} 
         //age={userAge} 
         //profileImage={profileImageUrl} 
       />
