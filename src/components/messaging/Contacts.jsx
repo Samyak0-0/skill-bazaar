@@ -27,12 +27,10 @@ const ContactSection = () => {
             throw new Error("Failed to fetch contacts");
           }
           const data = await res.json();
-          setContacts(data);
+          setContacts(data.contacts);
+          console.log(data)
 
-          const userContact = data.find((e) => e.email === session.user.email);
-          if (userContact) {
-            setUserId(userContact.id);
-          }
+          setUserId(data?.user?.id)
         }
       } catch (error) {
         console.error(error);

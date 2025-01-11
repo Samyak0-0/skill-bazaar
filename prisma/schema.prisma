@@ -48,16 +48,16 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  Notification  String[]
+  contacts      String[]
 
-  contacts String[]
+  services     Service[] @relation("UserServices")
+  buyerOrders  Order[]   @relation("BuyerOrders")
+  sellerOrders Order[]   @relation("SellerOrders")
 
-  services Service[] @relation("UserServices")
-
-  buyerOrders Order[] @relation("BuyerOrders")
-
-  sellerOrders Order[] @relation("SellerOrders")
-
+  reviews Review[] @relation("UserReviews")
 }
+
 //  messages Messages[] @relation("UserMessages")
 
 model VerificationToken {
@@ -77,30 +77,50 @@ model Service {
   orders   Order[] @relation("ServiceOrders")
 }
 
+model Review {
+  id         String   @id @default(cuid()) @map("_id")
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  reviewerId String
+  reviewer   User     @relation("UserReviews", fields: [reviewerId], references: [id])
+  rating     Int
+  comment    String
+  createdAt  DateTime @default(now())
+
+  @@index([orderId])
+  @@index([reviewerId])
+}
+
 model Order {
   id        String @id @default(cuid()) @map("_id")
   serviceId String
 
-  buyerId  String
-  sellerId String
+  workTitle   String
+  description String
+  rate        String
+  category    String
+  createdAt   DateTime @default(now())
+
+  buyerId  String?
+  sellerId String?
 
   status String
 
-  service Service @relation("ServiceOrders", fields: [serviceId], references: [id])
+  service Service? @relation("ServiceOrders", fields: [serviceId], references: [id])
 
-  buyer User @relation("BuyerOrders", fields: [buyerId], references: [id])
+  buyer User? @relation("BuyerOrders", fields: [buyerId], references: [id])
 
-  seller User @relation("SellerOrders", fields: [sellerId], references: [id])
+  seller User?    @relation("SellerOrders", fields: [sellerId], references: [id])
+  Review Review[]
 }
 
 model Messages {
-  id         String  @id @default(cuid()) @map("_id")
+  id          String   @id @default(cuid()) @map("_id")
   senderId    String
   recipientId String
-  text       String
-  file       String?
-  timestamp  DateTime
-
+  text        String
+  file        String?
+  timestamp   DateTime
 }
 
 model Notification {
