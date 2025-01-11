@@ -1,10 +1,21 @@
 const Notification = require('../models/Notification');
+const { sanitize } = require('validator');
 
 // Create a new notification
 const createNotification = async (req, res) => {
     try {
         // Destructure userId, message, and type from request body
-        const { userId, message, type } = req.body;
+        let { userId, message, type } = req.body;
+
+        // Validation: Check for missing fields
+        if (!userId || !message || !type) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+        // Sanitize the inputs to prevent injection attacks
+        userId = sanitize(userId);
+        message = sanitize(message);
+        type = sanitize(type);
 
         // Create a new notification in the database
         const notification = await Notification.create({ userId, message, type });

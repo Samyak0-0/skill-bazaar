@@ -12,3 +12,4 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
+console.log(`Connected to database: ${conn.connection.name}`);

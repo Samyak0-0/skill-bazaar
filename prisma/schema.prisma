@@ -103,21 +103,17 @@ model Messages {
 
 }
 
-<<<<<<< HEAD
 model Notification {
   id        String   @id @default(cuid()) @map("_id")
   userId    String
   message   String
   type      String
-  isRead    Boolean  @default(false)
   link      String?
+  isRead    Boolean  @default(false)
   date      DateTime @default(now())
-  
+  updatedAt DateTime @updatedAt // Automatically tracks last update time
+  orderId   String? 
+  order     Order?   @relation(fields: [orderId], references: [id])
+
   user      User     @relation(fields: [userId], references: [id])
 }
-
-
-
-=======
-// sender User @relation("UserMessages", fields: [senderId], references: [id])
->>>>>>> 0848959bdf5993e243d625d47af54d209519fb2a
