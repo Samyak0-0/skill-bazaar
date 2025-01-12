@@ -48,7 +48,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",  
+  "type": "module",  
   "bugs": {
     "url": "https://github.com/Samyak0-0/skill-bazaar/issues"
   },
