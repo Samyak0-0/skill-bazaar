@@ -1,9 +1,9 @@
-// Import necessary modules using CommonJS syntax
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const connectDB = require('./src/components/notification_cmt/config/db'); 
-const notificationRoutes = require('./src/components/notification_cmt/routes/notification');
+// Import necessary modules using ES6 syntax
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import connectDB from './src/components/notification_cmt/config/db.js';
+import notificationRoutes from './src/components/notification_cmt/routes/notification.js';
 
 // Initialize dotenv for environment variables
 dotenv.config();
@@ -11,9 +11,6 @@ dotenv.config();
 // Create an instance of express
 const app = express();
 app.use(express.json()); // Middleware to parse JSON requests
-
-// Set up a middleware to parse JSON bodies
-app.use(express.json());
 
 // MongoDB URI from the environment variable
 const mongoURI = process.env.MONGO_URI || 'your-mongo-db-uri-here'; // Make sure to add this in .env
