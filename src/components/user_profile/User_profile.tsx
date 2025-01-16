@@ -1,6 +1,6 @@
 "use client"; // Add this directive at the top
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Settings,
   LogOut,
@@ -11,41 +11,60 @@ import {
   Camera,
   Heart,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
 
-  const getInterests = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/interests?userId=cm5y12vbg0000ux2kfdfvxxhp"
-      );
-  
-      if (!response.ok) {
-        console.error("Failed to fetch interests:", response.statusText);
+  const { data } = useSession();
+
+  useEffect(() => {
+    if (!data?.user?.email) return;
+
+    const getInterests = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/interests?userMail=${data?.user?.email}`
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch interests:", response.statusText);
+          return null;
+        }
+
+        const apiData = await response.json();
+        // console.log("Interests:", data.skills);
+
+        setUserData((prev) => ({ ...prev, interests: apiData.interests }));
+        setUserData((prev) => ({ ...prev, skills: apiData.skills }));
+      } catch (error) {
+        console.error("Error fetching interests:", error);
         return null;
       }
-  
-      const data = await response.json();
-      console.log("Interests:", data.interests);
-  
-      return data.interests;
-    } catch (error) {
-      console.error("Error fetching interests:", error);
-      return null;
-    }
-  };
-  
+    };
+    getInterests();
+  }, [data?.user?.email]);
+
+  useEffect(() => {
+    if (!data?.user?.email) return;
+
+    setUserData((prev) => ({
+      ...prev,
+      name: data?.user?.name || "lorem",
+      avatar: data?.user?.image || "ipsum",
+      email: data?.user?.email || "yay",
+    }));
+  }, [data?.user?.email]);
 
   const [userData, setUserData] = useState({
-    name: "Kreetee Shakya",
-    email: "shakya.kreetee@gmail.com",
+    name: "",
+    email: "",
     phone: "0123456789",
     location: "Dhulikhel, Nepal",
-    avatar: "/api/placeholder/96/96",
-    skills: ["UI Design", "Frontend", "React", "Figma"],
-    interests: getInterests(),
+    avatar: "loremipsum",
+    skills: [],
+    interests: [],
     finances: {
       earnings: 5000,
       pendingPayments: 400,
@@ -164,7 +183,7 @@ const UserProfile = () => {
       <h3 className="text-xl font-medium mb-4">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {userData.interests?.map((interest) => (
+          {userData?.interests.map((interest) => (
             <span
               key={interest}
               className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
