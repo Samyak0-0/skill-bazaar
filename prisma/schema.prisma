@@ -50,6 +50,8 @@ model User {
   sessions      Session[]
   Notification  String[]
   contacts      String[]
+  skills        String[]
+  interests    String[]
 
   services     Service[] @relation("UserServices")
   buyerOrders  Order[]   @relation("BuyerOrders")
