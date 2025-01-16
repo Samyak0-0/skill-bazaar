@@ -1,14 +1,43 @@
-"use client";  // Add this directive at the top
+"use client"; // Add this directive at the top
 
 import React, { useState } from "react";
 import {
-  Settings, LogOut, User, Wallet,
-  MapPin, Phone, Camera, Heart
+  Settings,
+  LogOut,
+  User,
+  Wallet,
+  MapPin,
+  Phone,
+  Camera,
+  Heart,
 } from "lucide-react";
 
 const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [isEditing, setIsEditing] = useState(false);  // Track if in edit mode
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
+
+  const getInterests = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/interests?userId=cm5y12vbg0000ux2kfdfvxxhp"
+      );
+  
+      if (!response.ok) {
+        console.error("Failed to fetch interests:", response.statusText);
+        return null;
+      }
+  
+      const data = await response.json();
+      console.log("Interests:", data.interests);
+  
+      return data.interests;
+    } catch (error) {
+      console.error("Error fetching interests:", error);
+      return null;
+    }
+  };
+  
+
   const [userData, setUserData] = useState({
     name: "Kreetee Shakya",
     email: "shakya.kreetee@gmail.com",
@@ -16,12 +45,12 @@ const UserProfile = () => {
     location: "Dhulikhel, Nepal",
     avatar: "/api/placeholder/96/96",
     skills: ["UI Design", "Frontend", "React", "Figma"],
-    interests: ["Web Design", "Mobile Apps", "Typography"],
+    interests: getInterests(),
     finances: {
       earnings: 5000,
       pendingPayments: 400,
-      completedJobs: 15
-    }
+      completedJobs: 15,
+    },
   });
 
   const handleSaveProfile = () => {
@@ -35,8 +64,8 @@ const UserProfile = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <img 
-              src={userData.avatar} 
+            <img
+              src={userData.avatar}
               alt={userData.name}
               className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
             />
@@ -49,17 +78,21 @@ const UserProfile = () => {
               <input
                 type="text"
                 value={userData.name}
-                onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+                onChange={(e) =>
+                  setUserData({ ...userData, name: e.target.value })
+                }
                 className="text-2xl font-semibold text-gray-900"
               />
             ) : (
-              <h2 className="text-2xl font-semibold text-gray-900">{userData.name}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                {userData.name}
+              </h2>
             )}
             <p className="text-gray-500">{userData.email}</p>
           </div>
         </div>
-        <button 
-          onClick={() => setIsEditing(!isEditing)}  // Toggle edit mode
+        <button
+          onClick={() => setIsEditing(!isEditing)} // Toggle edit mode
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           {isEditing ? "Save Profile" : "Edit Profile"}
@@ -74,7 +107,9 @@ const UserProfile = () => {
               <input
                 type="text"
                 value={userData.phone}
-                onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+                onChange={(e) =>
+                  setUserData({ ...userData, phone: e.target.value })
+                }
                 className="text-gray-600"
               />
             ) : (
@@ -89,7 +124,9 @@ const UserProfile = () => {
               <input
                 type="text"
                 value={userData.location}
-                onChange={(e) => setUserData({ ...userData, location: e.target.value })}
+                onChange={(e) =>
+                  setUserData({ ...userData, location: e.target.value })
+                }
                 className="text-gray-600"
               />
             ) : (
@@ -106,8 +143,11 @@ const UserProfile = () => {
       <h3 className="text-xl font-medium mb-4">My Skills</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {userData.skills.map(skill => (
-            <span key={skill} className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm">
+          {userData.skills.map((skill) => (
+            <span
+              key={skill}
+              className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm"
+            >
               {skill}
             </span>
           ))}
@@ -124,8 +164,11 @@ const UserProfile = () => {
       <h3 className="text-xl font-medium mb-4">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {userData.interests.map(interest => (
-            <span key={interest} className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm">
+          {userData.interests?.map((interest) => (
+            <span
+              key={interest}
+              className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
+            >
               {interest}
             </span>
           ))}
@@ -143,25 +186,41 @@ const UserProfile = () => {
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-600">Total Earnings</p>
-          <p className="text-2xl font-semibold text-blue-600">${userData.finances.earnings}</p>
+          <p className="text-2xl font-semibold text-blue-600">
+            ${userData.finances.earnings}
+          </p>
         </div>
         <div className="p-4 bg-orange-50 rounded-lg">
           <p className="text-sm text-gray-600">Pending Payments</p>
-          <p className="text-2xl font-semibold text-orange-600">${userData.finances.pendingPayments}</p>
+          <p className="text-2xl font-semibold text-orange-600">
+            ${userData.finances.pendingPayments}
+          </p>
         </div>
         <div className="p-4 bg-green-50 rounded-lg">
           <p className="text-sm text-gray-600">Completed Jobs</p>
-          <p className="text-2xl font-semibold text-green-600">{userData.finances.completedJobs}</p>
+          <p className="text-2xl font-semibold text-green-600">
+            {userData.finances.completedJobs}
+          </p>
         </div>
       </div>
     </div>
   );
 
   const tabs = [
-    { id: 'profile', label: 'Profile', icon: User, component: ProfileView },
-    { id: 'skills', label: 'Skills', icon: Settings, component: SkillsView },
-    { id: 'interests', label: 'Interests', icon: Heart, component: InterestsView },
-    { id: 'finances', label: 'Finances', icon: Wallet, component: FinancesView }
+    { id: "profile", label: "Profile", icon: User, component: ProfileView },
+    { id: "skills", label: "Skills", icon: Settings, component: SkillsView },
+    {
+      id: "interests",
+      label: "Interests",
+      icon: Heart,
+      component: InterestsView,
+    },
+    {
+      id: "finances",
+      label: "Finances",
+      icon: Wallet,
+      component: FinancesView,
+    },
   ];
 
   return (
@@ -170,14 +229,14 @@ const UserProfile = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="mb-6 border-b">
             <div className="flex space-x-6">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`pb-4 px-2 relative ${
-                    activeTab === tab.id 
-                      ? 'text-blue-600 border-b-2 border-blue-600' 
-                      : 'text-gray-500'
+                    activeTab === tab.id
+                      ? "text-blue-600 border-b-2 border-blue-600"
+                      : "text-gray-500"
                   }`}
                 >
                   <div className="flex items-center space-x-2">
@@ -189,10 +248,10 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {tabs.find(tab => tab.id === activeTab)?.component()}
-          
-          <button 
-            onClick={() => console.log('Logout')}
+          {tabs.find((tab) => tab.id === activeTab)?.component()}
+
+          <button
+            onClick={() => console.log("Logout")}
             className="mt-8 flex items-center text-red-500 hover:text-red-600"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -205,8 +264,3 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
-
-
-
-
-
