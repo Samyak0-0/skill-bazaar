@@ -51,7 +51,7 @@ model User {
   Notification  String[]
   contacts      String[]
   skills        String[]
-  interests    String[]
+  interests     String[]
 
   services     Service[] @relation("UserServices")
   buyerOrders  Order[]   @relation("BuyerOrders")
@@ -97,10 +97,10 @@ model Order {
   id        String @id @default(cuid()) @map("_id")
   serviceId String
 
-  workTitle   String
-  description String
-  rate        String
-  category    String
+  workTitle   String?
+  description String?
+  rate        String?
+  category    String?
   createdAt   DateTime @default(now())
 
   buyerId  String?
