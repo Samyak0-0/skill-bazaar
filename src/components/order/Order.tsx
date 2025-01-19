@@ -1,5 +1,5 @@
-"use client";
 
+"use client";
 import React, { useState } from "react";
 import Sold from "./sold";
 import Bought from "./bought";
@@ -9,88 +9,30 @@ export default function Orders() {
   const [hoveredTab, setHoveredTab] = useState<"sold" | "bought" | null>(null);
 
   return (
-    <div style={styles.container}>
+    <div className="w-[98%] mx-auto my-1 bg-black rounded-xl shadow-md overflow-hidden font-sans">
       {/* Tabs */}
-      <div style={styles.tabContainer}>
-      {["sold", "bought"].map((tab) => (
-      <button
-        key={tab}
-        style={{
-        ...styles.tabButton,
-        ...(activeTab === tab ? styles.activeTab : {}),
-        ...(hoveredTab === tab ? styles.hoverTab : {}),
-      }}
-      onClick={() => setActiveTab(tab as "sold" | "bought")}
-      onMouseEnter={() => setHoveredTab(tab as "sold" | "bought")}
-      onMouseLeave={() => setHoveredTab(null)}
-      >
-      {tab === "sold" ? "Sold by" : "Bought by"}
-      </button>
-      ))}
+      <div className="flex justify-center bg-gray-300 border-b border-gray-200 rounded-t-lg sticky top-0 z-10">
+        {["sold", "bought"].map((tab) => (
+          <button
+            key={tab}
+            className={`flex-1 p-4 font-bold cursor-pointer transition-colors duration-300 text-black
+              ${activeTab === tab ? 'bg-gray-500 text-white border-b-2 border-gray-300 rounded-t-lg' : ''}
+              ${hoveredTab === tab ? 'bg-gray-400 text-black' : ''}`}
+            onClick={() => setActiveTab(tab as "sold" | "bought")}
+            onMouseEnter={() => setHoveredTab(tab as "sold" | "bought")}
+            onMouseLeave={() => setHoveredTab(null)}
+          >
+            {tab === "sold" ? "Sold by" : "Bought by"}
+          </button>
+        ))}
       </div>
 
-
       {/* Tab Content */}
-      <div style={styles.tabContent}>
-        <div style={styles.cardContainer}>
+      <div className="p-4 bg-black text-center rounded-b-xl max-h-[530px] overflow-y-auto mt-px">
+        <div className="p-1">
           {activeTab === "sold" ? <Sold /> : <Bought />}
         </div>
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    backgroundColor: "black",
-    width: "98%",
-    margin: "5px auto",
-    fontFamily: "Arial, sans-serif",
-    borderRadius: "12px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    overflow: "hidden",
-  },
-  tabContainer: {
-    display: "flex",
-    justifyContent: "center",
-    backgroundColor: "#d1d5db",
-    borderBottom: "1px solid #ddd",
-    borderRadius: "8px 8px 0 0",
-    position: "sticky" as "sticky",
-    top: 0,
-    zIndex: 2,
-  },
-  tabButton: {
-    flex: 1,
-    padding: "15px",
-    cursor: "pointer",
-    fontWeight: "bold",
-    color: "black",
-    backgroundColor: "transparent",
-    transition: "color 0.3s ease, background-color 0.3s ease",
-    fontSize: "16px",
-  },
-  activeTab: {
-    color: "#fff",
-    backgroundColor: "#616161",
-    borderBottom: "3px solid #dbdbdb",
-    borderRadius: "8px 8px 0 0",
-  },
-  hoverTab: {
-    backgroundColor: "#929292",
-    color: "black",
-  },
-  tabContent: {
-    padding: "10px",
-    color: "#333",
-    backgroundColor: "black",
-    textAlign: "center" as "center",
-    borderRadius: "0 0 12px 12px",
-    maxHeight: "530px",
-    overflowY: "auto" as "auto",
-    marginTop: "1px",
-  },
-  cardContainer: {
-    padding: "2px",
-  },
-};
