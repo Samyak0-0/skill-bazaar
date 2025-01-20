@@ -10,7 +10,6 @@ export default function Orders() {
 
   return (
     <div className="w-[98%] mx-auto my-1 bg-black rounded-xl shadow-md overflow-hidden font-sans">
-      {/* Tabs */}
       <div className="flex justify-center bg-gray-300 border-b border-gray-200 rounded-t-lg sticky top-0 z-10">
         {["sold", "bought"].map((tab) => (
           <button
@@ -26,8 +25,6 @@ export default function Orders() {
           </button>
         ))}
       </div>
-
-      {/* Tab Content */}
       <div className="p-4 bg-black text-center rounded-b-xl max-h-[530px] overflow-y-auto mt-px">
         <div className="p-1">
           {activeTab === "sold" ? <Sold /> : <Bought />}

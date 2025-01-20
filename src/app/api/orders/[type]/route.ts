@@ -10,7 +10,6 @@ export async function GET(
   { params }: { params: { type: string } }
 ) {
   try {
-    // Retrieve the session using next-auth
     const session = await getServerSession(authOptions);
 
     // Ensure session and user ID are present
@@ -24,7 +23,6 @@ export async function GET(
     const type = params.type;  // 'sold' or 'bought'
     const userId = session.user.id; // Access userId from session
 
-    // Validate the 'type' parameter
     if (type !== 'sold' && type !== 'bought') {
       return NextResponse.json(
         { error: 'Invalid order type' },
@@ -32,7 +30,6 @@ export async function GET(
       );
     }
 
-    // Fetch orders based on the userId and the order type (sold or bought)
     const orders = await prisma.order.findMany({
       where: {
         ...(type === 'sold' 

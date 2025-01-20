@@ -26,17 +26,6 @@ export default function Sold() {
             Authorization: `Bearer ${session.user.id}`,  // Send user id in the header
           },
         });
-        console.log('Response status:', response.status);
-        
-        const textData = await response.text();
-        console.log('Raw response:', textData);
-        
-        // Check if the response is empty
-        if (!textData) {
-          throw new Error('Empty response received');
-        }
-        
-        const data = JSON.parse(textData);
         
         if (!response.ok) {
           throw new Error(data.error || 'Failed to fetch orders');
