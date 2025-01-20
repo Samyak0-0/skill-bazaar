@@ -1,4 +1,4 @@
-// components/order/type.ts
+// types/order.ts
 export interface Order {
   id: string;
   workTitle: string | null;
@@ -9,7 +9,7 @@ export interface Order {
   buyerId: string | null;
   sellerId: string | null;
   status: string;
-  serviceId: string;  // Added this as it's required in your Prisma schema
+  serviceId: string;
   service?: {
     id: string;
     name: string;

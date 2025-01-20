@@ -1,3 +1,4 @@
+// app/api/orders/[type]/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth/next';
@@ -11,17 +12,18 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-
-    // Ensure session and user ID are present
-    if (!session || !session.user || !session.user.id) {
+    
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const type = params.type;  // 'sold' or 'bought'
-    const userId = session.user.id; // Access userId from session
+    const type = params.type;
+    const userId = session.user.id;
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
 
     if (type !== 'sold' && type !== 'bought') {
       return NextResponse.json(
@@ -32,10 +34,8 @@ export async function GET(
 
     const orders = await prisma.order.findMany({
       where: {
-        ...(type === 'sold' 
-          ? { sellerId: userId }
-          : { buyerId: userId }
-        )
+        [type === 'sold' ? 'sellerId' : 'buyerId']: userId,
+        ...(status && status !== 'all' ? { status } : {})
       },
       include: {
         service: true,
@@ -53,6 +53,9 @@ export async function GET(
         },
         Review: true,
       },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
     return NextResponse.json(orders);
