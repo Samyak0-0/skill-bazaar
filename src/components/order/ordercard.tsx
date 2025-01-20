@@ -1,4 +1,3 @@
-// components/order/ordercard.tsx
 import React, { useState } from "react";
 import { OrderCardProps } from "./type";
 
@@ -7,9 +6,7 @@ export default function OrderCard({ username, skill, work, status, date, reviews
 
   return (
     <div
-      className={`flex justify-between bg-gray-100 p-4 my-2 rounded-lg shadow-md transition-transform duration-300 ${
-        isHovered ? 'transform scale-[1.015] shadow-lg' : ''
-      }`}
+      className={`flex justify-between bg-gray-100 p-4 my-2 rounded-lg shadow-md transition-transform duration-300 ${isHovered ? 'transform scale-[1.015] shadow-lg' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

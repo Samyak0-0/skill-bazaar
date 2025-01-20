@@ -1,24 +1,50 @@
-// components/order/sold.tsx
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';  // Import useSession
 import OrderCard from "./ordercard";
 import { Order } from "./type";
 
 export default function Sold() {
+  const { data: session, status } = useSession();  // Get session data
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSoldOrders = async () => {
+      if (status === "loading") return;  // Wait until session is ready
+
+      if (!session) {
+        setError("User not authenticated");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch('/api/orders');
-        if (!response.ok) throw new Error('Failed to fetch orders');
+        console.log('Starting fetch for sold orders...');
+        const response = await fetch('/api/orders/sold', {
+          headers: {
+            Authorization: `Bearer ${session.user.id}`,  // Send user id in the header
+          },
+        });
+        console.log('Response status:', response.status);
         
-        const data = await response.json();
-        // Filter orders where the current user is the seller
-        const soldOrders = data.filter((order: Order) => order.sellerId === 'CURRENT_USER_ID');
-        setOrders(soldOrders);
+        const textData = await response.text();
+        console.log('Raw response:', textData);
+        
+        // Check if the response is empty
+        if (!textData) {
+          throw new Error('Empty response received');
+        }
+        
+        const data = JSON.parse(textData);
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch orders');
+        }
+        
+        setOrders(data);
       } catch (err) {
+        console.error('Detailed fetch error:', err);
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
@@ -26,7 +52,7 @@ export default function Sold() {
     };
 
     fetchSoldOrders();
-  }, []);
+  }, [session, status]);
 
   if (loading) {
     return (
@@ -54,15 +80,15 @@ export default function Sold() {
 
   return (
     <div className="space-y-4">
-      {orders.map((order, index) => (
+      {orders.map((order) => (
         <OrderCard
-          key={order.id || index}
-          username={order.buyerId || 'Unknown User'}
-          skill={order.category || 'Unknown Category'}
+          key={order.id}
+          username={order.buyer?.name || 'Unknown User'}
+          skill={order.service?.name || 'Unknown Service'}
           work={order.workTitle || 'Untitled Work'}
           status={order.status}
           date={new Date(order.createdAt).toLocaleDateString()}
-          reviews={0}
+          reviews={order.Review?.length || 0}
         />
       ))}
     </div>
