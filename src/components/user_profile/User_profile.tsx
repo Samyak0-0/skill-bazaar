@@ -1,6 +1,6 @@
-"use client"; // Add this directive at the top
+"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Settings,
   LogOut,
@@ -14,30 +14,7 @@ import {
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
-
-  const getInterests = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/interests?userId=cm5y12vbg0000ux2kfdfvxxhp"
-      );
-  
-      if (!response.ok) {
-        console.error("Failed to fetch interests:", response.statusText);
-        return null;
-      }
-  
-      const data = await response.json();
-      console.log("Interests:", data.interests);
-  
-      return data.interests;
-    } catch (error) {
-      console.error("Error fetching interests:", error);
-      return null;
-    }
-  };
-  
-
+  const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({
     name: "Kreetee Shakya",
     email: "shakya.kreetee@gmail.com",
@@ -45,7 +22,7 @@ const UserProfile = () => {
     location: "Dhulikhel, Nepal",
     avatar: "/api/placeholder/96/96",
     skills: ["UI Design", "Frontend", "React", "Figma"],
-    interests: getInterests(),
+    interests: [],
     finances: {
       earnings: 5000,
       pendingPayments: 400,
@@ -53,9 +30,33 @@ const UserProfile = () => {
     },
   });
 
+  useEffect(() => {
+    const fetchInterests = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/interests?userId=cm5y12vbg0000ux2kfdfvxxhp"
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch interests:", response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        setUserData((prevData) => ({
+          ...prevData,
+          interests: data.interests || [],
+        }));
+      } catch (error) {
+        console.error("Error fetching interests:", error);
+      }
+    };
+
+    fetchInterests();
+  }, []);
+
   const handleSaveProfile = () => {
     setIsEditing(false);
-    // Here, you can save the updated data (for example, send it to the server)
     console.log("Profile updated", userData);
   };
 
@@ -92,7 +93,10 @@ const UserProfile = () => {
           </div>
         </div>
         <button
-          onClick={() => setIsEditing(!isEditing)} // Toggle edit mode
+          onClick={() => {
+            if (isEditing) handleSaveProfile();
+            setIsEditing(!isEditing);
+          }}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           {isEditing ? "Save Profile" : "Edit Profile"}
@@ -140,7 +144,7 @@ const UserProfile = () => {
 
   const SkillsView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">My Skills</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">My Skills</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {userData.skills.map((skill) => (
@@ -161,17 +165,21 @@ const UserProfile = () => {
 
   const InterestsView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">My Interests</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {userData.interests?.map((interest) => (
-            <span
-              key={interest}
-              className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
-            >
-              {interest}
-            </span>
-          ))}
+          {userData.interests?.length ? (
+            userData.interests.map((interest) => (
+              <span
+                key={interest}
+                className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
+              >
+                {interest}
+              </span>
+            ))
+          ) : (
+            <p className="text-gray-500">No interests found.</p>
+          )}
         </div>
         <button className="px-4 py-2 border border-green-500 text-green-500 rounded-lg hover:bg-green-50">
           Add New Interest
@@ -182,7 +190,7 @@ const UserProfile = () => {
 
   const FinancesView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">Financial Overview</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Overview</h3>
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-600">Total Earnings</p>
