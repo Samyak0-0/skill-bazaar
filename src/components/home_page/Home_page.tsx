@@ -2,7 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, Loader2, X } from "lucide-react";
 
+import { useRouter } from 'next/navigation';//for orderdetails page nav
+
+
 interface OrderData {
+  id: string;
   workTitle: string;
   description: string;
   rate: string;
@@ -14,6 +18,7 @@ interface OrderData {
 }
 
 const Home_page = () => {
+  const router = useRouter();//agaiin for orderdetail page nav
   const recommendedScrollContainer = React.useRef<HTMLDivElement>(null);
   const categoryScrollContainer = React.useRef<HTMLDivElement>(null);
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -100,6 +105,21 @@ const Home_page = () => {
           className="flex gap-4 overflow-x-auto pr-4 pb-4 pt-4 scrollbar-hide"
         >
           {orders.map((order, index) => (
+          <div 
+            key={index} 
+            onClick={() => router.push(`/orderdetails/${order.id}`)}
+            className={`min-w-[18.75rem] h-[14.0625rem] p-4 mt-3 mb-2 border rounded-lg shadow-sm transition-all duration-500 cursor-pointer bg-gray-300 hover:scale-105 ${isLoading ? 'opacity-50' : 'opacity-100'} animate-fadeIn`}
+            style={{
+            animationDelay: `${index * 100}ms`
+          }}
+          >
+          <h3 className="font-medium mb-3 text-black">Work: {order.workTitle}</h3>
+          <p className="font-medium text-black mb-4">Description: {order.description}</p>
+          <p className="font-medium text-black mb-5">Rate: {order.rate}</p>
+          <p className="font-medium text-black">Category: {order.category}</p>
+          </div>
+          ))}
+          {/* {orders.map((order, index) => (
             <div 
               key={index} 
               className={`min-w-[18.75rem] h-[14.0625rem] p-4 mt-3 mb-2 border rounded-lg shadow-sm transition-all duration-500 cursor-pointer bg-gray-300 hover:scale-105 ${isLoading ? 'opacity-50' : 'opacity-100'} animate-fadeIn`}
@@ -112,7 +132,7 @@ const Home_page = () => {
               <p className="font-medium text-black mb-5">Rate: {order.rate}</p>
               <p className="font-medium text-black">Category: {order.category}</p>
             </div>
-          ))}
+          ))} */}
           {isLoading && orders.length === 0 && (
             <div className="flex items-center justify-center w-full h-[14.0625rem]">
               <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
