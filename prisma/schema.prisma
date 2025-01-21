@@ -125,17 +125,16 @@ model Messages {
   timestamp   DateTime
 }
 
-// model Notification {
-//   id        String   @id @default(cuid()) @map("_id")
-//   userId    String
-//   message   String
-//   type      String
-//   link      String?
-//   isRead    Boolean  @default(false)
-//   date      DateTime @default(now())
-//   updatedAt DateTime @updatedAt // Automatically tracks last update time
-//   orderId   String? 
-//   order     Order?   @relation(fields: [orderId], references: [id])
-// 
-//   user      User     @relation(fields: [userId], references: [id])
-// }
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  type      String
+  message   String
+  userId    String   
+  read      Boolean  @default(false) @map("isRead")  // Map to match MongoDB field
+  createdAt DateTime @default(now()) @map("date")    // Map to match MongoDB field
+  updatedAt DateTime @default(now()) @map("updatedAt")
+  orderId   String?  // Optional field
+
+  @@map("Notification")  
+}
