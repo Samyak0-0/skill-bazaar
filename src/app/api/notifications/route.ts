@@ -5,14 +5,14 @@ const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    console.log('API: Attempting to fetch notifications...'); // Debug log
+    console.log('API: Attempting to fetch notifications...'); 
     const notifications = await prisma.notification.findMany({
       orderBy: {
         createdAt: 'desc'
       },
     });
     
-    console.log('API: Found notifications:', notifications); // Debug log
+    console.log('API: Found notifications:', notifications); 
     
     if (!notifications) {
       return NextResponse.json(
