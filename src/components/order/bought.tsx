@@ -56,7 +56,7 @@ export default function Bought() {
             key={s}
             className={`px-4 py-2 rounded transition-colors ${
               statusFilter === s
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-black'
                 : 'bg-gray-200 text-black hover:bg-black hover:text-white'
             }`}
             onClick={() => setStatusFilter(s)}
@@ -85,7 +85,7 @@ export default function Bought() {
       )}
 
       {!loading && !error && orders.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 text-black">
           {orders.map((order) => (
             <OrderCard
               key={order.id}

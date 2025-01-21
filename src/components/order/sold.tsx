@@ -1,10 +1,10 @@
-// app/orders/sold.tsx
+// app/orders/bought.tsx (and sold.tsx with minimal changes)
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import OrderCard from "./ordercard";
 import { Order } from "./type";
 
-export default function Sold() {
+export default function Bought() {
   const { data: session, status: sessionStatus } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ export default function Sold() {
             key={s}
             className={`px-4 py-2 rounded transition-colors ${
               statusFilter === s
-                ? 'bg-blue-500 text-white'
+                ? 'bg-blue-500 text-black'
                 : 'bg-gray-200 text-black hover:bg-black hover:text-white'
             }`}
             onClick={() => setStatusFilter(s)}
@@ -80,16 +80,16 @@ export default function Sold() {
 
       {!loading && !error && orders.length === 0 && (
         <div className="text-gray-500 text-center p-4">
-          No sold orders found
+          No orders found
         </div>
       )}
 
       {!loading && !error && orders.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 text-black">
           {orders.map((order) => (
             <OrderCard
               key={order.id}
-              username={order.buyer?.name || 'Unknown User'}
+              username={order.seller?.name || 'Unknown User'}
               skill={order.service?.name || 'Unknown Service'}
               work={order.workTitle || 'Untitled Work'}
               status={order.status}

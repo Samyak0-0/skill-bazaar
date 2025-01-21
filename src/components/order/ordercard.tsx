@@ -41,10 +41,10 @@ export default function OrderCard({ username, skill, work, status, date, reviews
         <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
           {status}
         </span>
-        <p className="mt-2 text-gray-600">Date: {date}</p>
+        <p className="mt-2 text-black">Date: {date}</p>
         <div className="flex items-center justify-end gap-2 mt-2">
-          <span className="text-gray-600">{reviews} reviews</span>
-          <button className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+          <span className="text-black">{reviews} reviews</span>
+          <button className="px-3 py-1 bg-gray-200 text-black rounded hover:bg-gray-300 transition-colors">
             View Reviews
           </button>
         </div>
