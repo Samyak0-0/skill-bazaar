@@ -1,6 +1,6 @@
 "use client"; // Add this directive at the top
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Settings,
   LogOut,
@@ -15,14 +15,57 @@ import { useSession } from "next-auth/react";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
+
+  const { data } = useSession();
+
+  useEffect(() => {
+    if (!data?.user?.email) return;
+
+    const getInterests = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/interests?userMail=${data?.user?.email}`
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch interests:", response.statusText);
+          return null;
+        }
+
+        const apiData = await response.json();
+        // console.log("Interests:", data.skills);
+
+        setUserData((prev) => ({ ...prev, interests: apiData.interests }));
+        setUserData((prev) => ({ ...prev, skills: apiData.skills }));
+      } catch (error) {
+        console.error("Error fetching interests:", error);
+        return null;
+      }
+    };
+    getInterests();
+  }, [data?.user?.email]);
+
+  useEffect(() => {
+    if (!data?.user?.email) return;
+
+    console.log(data.user.image)
+
+    setUserData((prev) => ({
+      ...prev,
+      name: data?.user?.name || "lorem",
+      avatar: data?.user?.image || "ipsum",
+      email: data?.user?.email || "yay",
+    }));
+  }, [data?.user?.email]);
+
   const [userData, setUserData] = useState({
-    name: "Kreetee shakya",
-    email: "kreetee.shakyagmail.com",
+    name: "",
+    email: "",
     phone: "0123456789",
     location: "Dhulikhel, Nepal",
-    avatar: "/api/placeholder/96/96",
-    skills: ["UI Design", "Frontend", "React", "Figma"],
+    avatar: "loremipsum",
+    skills: [],
     interests: [],
     finances: {
       earnings: 5000,
@@ -30,31 +73,6 @@ const UserProfile = () => {
       completedJobs: 15,
     },
   });
-
-  // Fetch interests when the component mounts
-  useEffect(() => {
-    const fetchInterests = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:3000/api/interests?userId=cm66tk8t70000v7soop56itly");
-
-        if (!response.ok) {
-          console.error("Failed to fetch interests:", response.statusText);
-          return;
-        }
-
-        const data = await response.json();
-        setUserData((prevData) => ({
-          ...prevData,
-          interests: data.interests || [],
-        }));
-      } catch (error) {
-        console.error("Error fetching interests:", error);
-      }
-    };
-
-    fetchInterests();
-  }, []); // Empty dependency array ensures this runs only once on mount
 
   const handleSaveProfile = () => {
     setIsEditing(false);
@@ -95,10 +113,7 @@ const UserProfile = () => {
           </div>
         </div>
         <button
-          onClick={() => {
-            if (isEditing) handleSaveProfile();
-            setIsEditing(!isEditing);
-          }} // Toggle edit mode
+          onClick={() => setIsEditing(!isEditing)} // Toggle edit mode
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           {isEditing ? "Save Profile" : "Edit Profile"}
@@ -170,18 +185,14 @@ const UserProfile = () => {
       <h3 className="text-xl font-medium mb-4">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {userData.interests?.length ? (
-            userData.interests.map((interest) => (
-              <span
-                key={interest}
-                className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
-              >
-                {interest}
-              </span>
-            ))
-          ) : (
-            <p className="text-gray-500">No interests found.</p>
-          )}
+          {userData?.interests.map((interest) => (
+            <span
+              key={interest}
+              className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
+            >
+              {interest}
+            </span>
+          ))}
         </div>
         <button className="px-4 py-2 border border-green-500 text-green-500 rounded-lg hover:bg-green-50">
           Add New Interest
