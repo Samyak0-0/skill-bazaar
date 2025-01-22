@@ -1,15 +1,13 @@
-
 // Import required modules
 import { NextResponse } from "next/server";
 import { prisma } from "@/utilities/prisma";
 
 export async function GET(req) {
   try {
-    // Extract userId from the query parameters (you can modify this based on how the ID is passed)
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+    const userMail = searchParams.get("userMail");
 
-    if (!userId) {
+    if (!userMail) {
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 400 }
@@ -18,8 +16,8 @@ export async function GET(req) {
 
     // Fetch the user's interests from the database
     const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { interests: true,skills: true },
+      where: { email: userMail },
+      select: { interests: true, skills: true },
     });
 
     if (!user) {

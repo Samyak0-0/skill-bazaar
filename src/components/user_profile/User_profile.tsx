@@ -14,14 +14,18 @@ import {
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
   const [userData, setUserData] = useState({
-    name: "Kreetee Shakya",
-    email: "shakya.kreetee@gmail.com",
+    name: "",
+    email: "",
     phone: "0123456789",
     location: "Dhulikhel, Nepal",
     avatar: "/api/placeholder/96/96",
     skills: ["UI Design", "Frontend", "React", "Figma"],
+=======
+    avatar: "loremipsum",
+    skills: [],
+>>>>>>> a053479d07ef9c3b37d55a2fcade864d114219ca
     interests: [],
     finances: {
       earnings: 5000,
@@ -168,6 +172,7 @@ const UserProfile = () => {
       <h3 className="text-xl font-semibold text-gray-900 mb-4">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
+<<<<<<< HEAD
           {userData.interests?.length ? (
             userData.interests.map((interest) => (
               <span
