@@ -97,10 +97,10 @@ model Order {
   id        String @id @default(cuid()) @map("_id")
   serviceId String
 
-  workTitle   String?
-  description String?
-  rate        String?
-  category    String?
+  workTitle   String??
+  description String??
+  rate        String??
+  category    String??
   createdAt   DateTime @default(now())
 
   buyerId  String?
@@ -139,3 +139,17 @@ model Messages {
 // 
 //   user      User     @relation(fields: [userId], references: [id])
 // }
+
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  type      String
+  message   String
+  userId    String   
+  read      Boolean  @default(false) @map("isRead")  // Map to match MongoDB field
+  createdAt DateTime @default(now()) @map("date")    // Map to match MongoDB field
+  updatedAt DateTime @default(now()) @map("updatedAt")
+  orderId   String?  // Optional field
+
+  @@map("Notification")  
+}

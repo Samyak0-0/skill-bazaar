@@ -1,10 +1,9 @@
 // app/api/orders/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'; 
 
 const prisma = new PrismaClient();
 
-// GET endpoint to fetch all orders
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -29,7 +28,6 @@ export async function GET(req: Request) {
   }
 }
 
-//post endpoint
 export async function POST(req: Request) {
   try {
     const body = await req.json();

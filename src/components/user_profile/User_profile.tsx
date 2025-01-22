@@ -11,18 +11,19 @@ import {
   Camera,
   Heart,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
+  const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({
-    name: "Kreetee Shakya",
-    email: "shakya.kreetee@gmail.com",
+    name: "",
+    email: "",
     phone: "0123456789",
     location: "Dhulikhel, Nepal",
     avatar: "/api/placeholder/96/96",
     skills: ["UI Design", "Frontend", "React", "Figma"],
-    interests: ["Developments"],
+    interests: [],
     finances: {
       earnings: 5000,
       pendingPayments: 400,

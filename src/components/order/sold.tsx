@@ -1,10 +1,18 @@
+<<<<<<< HEAD
 // app/orders/sold.tsx
+=======
+// app/orders/bought.tsx (and sold.tsx with minimal changes)
+>>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import OrderCard from "./ordercard";
 import { Order } from "./type";
 
+<<<<<<< HEAD
 export default function Sold() {
+=======
+export default function Bought() {
+>>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
   const { data: session, status: sessionStatus } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +64,11 @@ export default function Sold() {
             key={s}
             className={`px-4 py-2 rounded transition-colors ${
               statusFilter === s
+<<<<<<< HEAD
                 ? 'bg-blue-500 text-white'
+=======
+                ? 'bg-blue-500 text-black'
+>>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
                 : 'bg-gray-200 text-black hover:bg-black hover:text-white'
             }`}
             onClick={() => setStatusFilter(s)}
@@ -80,16 +92,28 @@ export default function Sold() {
 
       {!loading && !error && orders.length === 0 && (
         <div className="text-gray-500 text-center p-4">
+<<<<<<< HEAD
           No sold orders found
+=======
+          No orders found
+>>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
         </div>
       )}
 
       {!loading && !error && orders.length > 0 && (
+<<<<<<< HEAD
         <div className="space-y-4">
           {orders.map((order) => (
             <OrderCard
               key={order.id}
               username={order.buyer?.name || 'Unknown User'}
+=======
+        <div className="space-y-4 text-black">
+          {orders.map((order) => (
+            <OrderCard
+              key={order.id}
+              username={order.seller?.name || 'Unknown User'}
+>>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
               skill={order.service?.name || 'Unknown Service'}
               work={order.workTitle || 'Untitled Work'}
               status={order.status}

@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json()); // Middleware to parse JSON requests
 
 // MongoDB URI from the environment variable
-const mongoURI = process.env.MONGO_URI || 'your-mongo-db-uri-here'; // Make sure to add this in .env
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://samyakmhrzn9841:KEHlgifW1NgWpIjo@cluster0.rzgwy.mongodb.net/Skill-Bazaaar?retryWrites=true&w=majority&appName=Cluster0';
 
 // Connect to MongoDB using Mongoose
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })

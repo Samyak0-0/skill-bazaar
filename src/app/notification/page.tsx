@@ -12,3 +12,4 @@ const NotificationPage = (props: Props) => {
 };
 
 export default NotificationPage;
+

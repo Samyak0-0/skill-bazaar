@@ -35,7 +35,7 @@
     ".next/types/**/*.ts",
     "src/components/messaging/**/*.tsx", // Ensure components are included if using TypeScript JSX
     "src/utilities/**/*.ts", // Include all utilities as TypeScript files
-    "src/utilities/auth.ts", // Ensure auth file is treated as TypeScript
+    "src/utilities/auth.js", // Ensure auth file is treated as TypeScript
     "src/utilities/prisma.ts"
 , "src/components/order/bought.jsx"  ],
   "exclude": [
