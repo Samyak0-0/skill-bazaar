@@ -4,9 +4,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// You can hardcode these IDs after running the seed
-const TEST_SELLER_ID = "cm5tvg7dm0001v7ikzimffkob";
-const TEST_BUYER_ID = "cm5tvg6uv0000v7ikgur27dqm";
+//hardcoded test user IDs
+const TEST_SELLER_ID = "cm66ug29w0000v7ls10ac6rga";
+const TEST_BUYER_ID = "cm66ug2sl0001v7ls5ifwu0t5";
 
 export async function GET(
   request: Request,
