@@ -17,8 +17,8 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({
-    name: "",
-    email: "",
+    name: "Kreetee shakya",
+    email: "kreetee.shakyagmail.com",
     phone: "0123456789",
     location: "Dhulikhel, Nepal",
     avatar: "/api/placeholder/96/96",
@@ -36,8 +36,7 @@ const UserProfile = () => {
     const fetchInterests = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/api/interests?userId=cm66tk8t70000v7soop56itly"
-        );
+          "http://localhost:3000/api/interests?userId=cm66tk8t70000v7soop56itly");
 
         if (!response.ok) {
           console.error("Failed to fetch interests:", response.statusText);

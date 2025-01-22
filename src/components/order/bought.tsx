@@ -56,11 +56,7 @@ export default function Bought() {
             key={s}
             className={`px-4 py-2 rounded transition-colors ${
               statusFilter === s
-<<<<<<< HEAD
-                ? 'bg-blue-500 text-white'
-=======
                 ? 'bg-blue-500 text-black'
->>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
                 : 'bg-gray-200 text-black hover:bg-black hover:text-white'
             }`}
             onClick={() => setStatusFilter(s)}
@@ -89,11 +85,7 @@ export default function Bought() {
       )}
 
       {!loading && !error && orders.length > 0 && (
-<<<<<<< HEAD
-        <div className="space-y-4">
-=======
         <div className="space-y-4 text-black">
->>>>>>> 2a6ac8313e6eee4963fc3b77e4240d46c18ddd4e
           {orders.map((order) => (
             <OrderCard
               key={order.id}
