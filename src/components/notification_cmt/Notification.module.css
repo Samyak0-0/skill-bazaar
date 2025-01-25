@@ -41,5 +41,10 @@
   .notificationTime {
     font-size: 0.8em;
     color: #999;
-    white-space: nowrap; /* Prevents time from wrapping to next line */
+    white-space: nowrap;   /* Prevents time from wrapping to next line */
   }
+  
+  .read {
+    opacity: 0.7 ;
+    background-color: #f0f0f0;
+  } ;   

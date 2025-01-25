@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import styles from "./Notification.module.css";
 import { Loader2 } from "lucide-react";
 
 interface NotificationData {
@@ -23,25 +22,17 @@ function Notification() {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        console.log('Fetching notifications...'); // Debug log
         const response = await fetch('/api/notifications');
-        console.log('Response status:', response.status); // Debug log
-        
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to fetch notifications');
         }
-        
         const data = await response.json();
-        console.log('Fetched data:', data); // Debug log
-        
         if (!data.notifications) {
           throw new Error('No notifications data in response');
         }
-        
         setNotifications(data.notifications);
       } catch (err) {
-        console.error('Fetch error:', err); // Debug log
         setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
       } finally {
         setLoading(false);
@@ -65,7 +56,6 @@ function Notification() {
         throw new Error('Failed to mark notification as read');
       }
       
-      const data = await response.json();
       setNotifications(notifications.map(notif => 
         notif.id === id ? { ...notif, read: true } : notif
       ));
@@ -97,34 +87,29 @@ function Notification() {
   }
 
   return (
-    <div className={styles.container}>
-      <h1 className="text-3xl font-bold mb-4">Notifications</h1>
+    <div className="max-w-4xl mx-auto px-4 py-6">
       {notifications.length === 0 ? (
         <p className="text-center text-gray-500 py-8">No notifications to display</p>
       ) : (
-        <ul className={styles.notificationList}>
+        <div className="space-y-3">
           {notifications.map((notification) => (
-            <li
+            <div
               key={notification.id}
-              className={`${styles.notificationItem} ${
-                notification.read ? styles.read : ''
-              }`}
+              className={`bg-[#E5F0F3] rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md
+                ${notification.read ? 'bg-gray-100' : ''}`}
               onClick={() => !notification.read && markAsRead(notification.id)}
             >
               <div>
-                <h3 className={styles.notificationTitle}>
-                  {notification.type}
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                  Notification
                 </h3>
-                <p className={styles.notificationMessage}>
+                <p className="text-gray-600">
                   {notification.message}
                 </p>
-                <span className={styles.notificationTime}>
-                  {new Date(notification.createdAt).toLocaleString()}
-                </span>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

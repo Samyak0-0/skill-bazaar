@@ -11,6 +11,10 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        notification: {
+          unread: "#E5F0F3",
+          read: "#F3F4F6"
+        }
       },
     },
   },
