@@ -12,6 +12,7 @@ import {
   Heart,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -49,7 +50,7 @@ const UserProfile = () => {
   useEffect(() => {
     if (!data?.user?.email) return;
 
-    console.log(data.user.image)
+    console.log(data.user.image);
 
     setUserData((prev) => ({
       ...prev,
@@ -64,7 +65,7 @@ const UserProfile = () => {
     email: "",
     phone: "0123456789",
     location: "Dhulikhel, Nepal",
-    avatar: "loremipsum",
+    avatar: "https://plus.unsplash.com/premium_photo-1701090939615-1794bbac5c06?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z3JheSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D",
     skills: [],
     interests: [],
     finances: {
@@ -85,11 +86,15 @@ const UserProfile = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <img
-              src={userData.avatar}
-              alt={userData.name}
-              className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
-            />
+            {data?.user?.image && (
+              <Image
+                src={userData.avatar}
+                alt={userData.name}
+                width={200}
+                height={200}
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+              />
+            )}
             <button className="absolute bottom-0 right-0 p-1 bg-white rounded-full shadow-lg">
               <Camera className="w-4 h-4 text-gray-600" />
             </button>
