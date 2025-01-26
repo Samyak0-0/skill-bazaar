@@ -161,7 +161,7 @@ const UserProfile = () => {
 
   const SkillsView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">My Skills</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">My Skills</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {userData.skills.map((skill) => (
@@ -182,7 +182,7 @@ const UserProfile = () => {
 
   const InterestsView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">My Interests</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {userData?.interests.map((interest) => (
@@ -203,7 +203,7 @@ const UserProfile = () => {
 
   const FinancesView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">Financial Overview</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">Financial Overview</h3>
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-600">Total Earnings</p>
