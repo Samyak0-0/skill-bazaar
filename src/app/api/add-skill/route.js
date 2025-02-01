@@ -18,7 +18,7 @@ export async function POST(req) {
       where: { email: userMail },
       data: {
         skills: {
-          push: skill, // Assuming skills is an array
+          push: skill, // Use push to add the new skill
         },
       },
     });

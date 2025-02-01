@@ -107,25 +107,25 @@ const UserProfile = () => {
     setNewSkill(""); // Clear input
   };
   
-  const handleAddInterest = async () => {
-    if (!newInterest || !data?.user?.email) return; // Ensure 'data' and 'data.user.email' exist
-  
-    setUserData((prev) => ({
-      ...prev,
-      interests: [...prev.interests, newInterest],
-    }));
-  
-    await fetch(`http://localhost:3000/api/add-interest`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userMail: data.user.email, interest: newInterest }),
-    });
-  
-    setNewInterest(""); // Clear input
-  };
-  
+const handleAddInterest = async () => {
+  if (!newInterest || !data?.user?.email) return; // Ensure 'data' and 'data.user.email' exist
+
+  setUserData((prev) => ({
+    ...prev,
+    interests: [...prev.interests, newInterest],
+  }));
+
+  await fetch(`http://localhost:3000/api/add-interest`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userMail: data.user.email, interest: newInterest }),
+  });
+
+  setNewInterest(""); // Clear input
+};
+
 
   const ProfileView = () => (
     <div className="space-y-6">

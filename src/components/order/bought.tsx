@@ -1,4 +1,4 @@
-// app/orders/bought.tsx (and sold.tsx with minimal changes)
+// app/orders/bought.tsx 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import OrderCard from "./ordercard";
@@ -95,6 +95,7 @@ export default function Bought() {
               status={order.status}
               date={new Date(order.createdAt).toLocaleDateString()}
               reviews={order.Review?.length || 0}
+              orderId={order.id}
             />
           ))}
         </div>

@@ -13,25 +13,12 @@ export async function POST(req) {
       );
     }
 
-    // Fetch the current user's interests
-    const user = await prisma.user.findUnique({
-      where: { email: userMail },
-      select: { interests: true },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User  not found" },
-        { status: 404 }
-      );
-    }
-
     // Update the user's interests in the database
     await prisma.user.update({
       where: { email: userMail },
       data: {
         interests: {
-          set: [...user.interests, interest], // Combine existing interests with the new one
+          push: interest, // Use push to add the new interest
         },
       },
     });
@@ -44,4 +31,4 @@ export async function POST(req) {
       { status: 500 }
     );
   }
-}  
+}
