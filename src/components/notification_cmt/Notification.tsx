@@ -19,37 +19,44 @@ function Notification() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch('/api/notifications');
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch notifications');
-        }
-        const data = await response.json();
-        if (!data.notifications) {
-          throw new Error('No notifications data in response');
-        }
-        setNotifications(data.notifications);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
-      } finally {
-        setLoading(false);
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/notifications');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch notifications');
       }
-    };
+      const data = await response.json();
+      if (!data.notifications) {
+        throw new Error('No notifications data in response');
+      }
+      setNotifications(data.notifications);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Initial fetch
+  useEffect(() => {
     fetchNotifications();
+
+    // Set up polling for new notifications
+    const intervalId = setInterval(fetchNotifications, 30000); // Check every 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const markAsRead = async (id: string) => {
     try {
-      const response = await fetch(`/api/notifications`, {
+      const response = await fetch(`/api/notifications/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ notificationId: id }),
       });
       
       if (!response.ok) {
@@ -101,11 +108,14 @@ function Notification() {
             >
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  Notification
+                  {notification.type}
                 </h3>
                 <p className="text-gray-600">
                   {notification.message}
                 </p>
+                <small className="text-gray-500">
+                  {new Date(notification.createdAt).toLocaleString()}
+                </small>
               </div>
             </div>
           ))}
