@@ -1,6 +1,7 @@
 // components/OrderCard.tsx
 import React, { useState } from "react";
 import { OrderCardProps } from "./type";
+import ReviewModal from "./ReviewModal";
 
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
@@ -15,40 +16,87 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export default function OrderCard({ username, skill, work, status, date, reviews }: OrderCardProps) {
+export default function OrderCard({ username, skill, work, status, date, reviews, orderId }: OrderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
+  const [reviewsData, setReviewsData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const statusColor = getStatusColor(status);
 
+  const handleViewReviews = async () => {
+  setLoading(true);
+  setError(null);
+
+  try {
+    const response = await fetch(`/api/orders/{type}/${orderId}/reviews`);
+
+    if (!response.ok) {
+      // Attempt to parse error response as JSON
+      const errorData = await response.json().catch(() => null);
+      const errorMessage = errorData?.error || `Error: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    setReviewsData(data);
+    setShowReviews(true);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    setError(error instanceof Error ? error.message : 'Failed to fetch reviews');
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
-    <div
-      className={`flex justify-between bg-gray-100 p-4 my-2 rounded-lg shadow-md transition-transform duration-300 ${
-        isHovered ? 'transform scale-[1.015] shadow-lg' : ''
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="flex gap-4">
-        <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-          👤
+    <>
+      <div
+        className={`flex justify-between bg-gray-100 p-4 my-2 rounded-lg shadow-md transition-transform duration-300 ${
+          isHovered ? 'transform scale-[1.015] shadow-lg' : ''
+        }`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="flex gap-4">
+          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+            👤
+          </div>
+          <div>
+            <p><strong>Username</strong>: {username}</p>
+            <p><strong>Skill</strong>: {skill}</p>
+            <p><strong>Work</strong>: {work}</p>
+          </div>
         </div>
-        <div>
-          <p><strong>Username</strong>: {username}</p>
-          <p><strong>Skill</strong>: {skill}</p>
-          <p><strong>Work</strong>: {work}</p>
+        <div className="text-right">
+          <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
+            {status}
+          </span>
+          <p className="mt-2 text-black">Date: {date}</p>
+          <div className="flex items-center justify-end gap-2 mt-2">
+            <span className="text-black">{reviews} reviews</span>
+            <button 
+              className={`px-3 py-1 bg-gray-200 text-black rounded hover:bg-gray-300 transition-colors ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              onClick={handleViewReviews}
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : 'View Reviews'}
+            </button>
+          </div>
+          {error && (
+            <p className="text-red-500 text-sm mt-1">{error}</p>
+          )}
         </div>
       </div>
-      <div className="text-right">
-        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
-          {status}
-        </span>
-        <p className="mt-2 text-black">Date: {date}</p>
-        <div className="flex items-center justify-end gap-2 mt-2">
-          <span className="text-black">{reviews} reviews</span>
-          <button className="px-3 py-1 bg-gray-200 text-black rounded hover:bg-gray-300 transition-colors">
-            View Reviews
-          </button>
-        </div>
-      </div>
-    </div>
+
+      <ReviewModal
+        isOpen={showReviews}
+        onClose={() => setShowReviews(false)}
+        reviews={reviewsData}
+        orderId={orderId}
+      />
+    </>
   );
 }

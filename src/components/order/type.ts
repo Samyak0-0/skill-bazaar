@@ -29,6 +29,16 @@ export interface Order {
   }>;
 }
 
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  reviewer: {
+    name: string;
+  };
+}
+
 export interface OrderCardProps {
   username: string;
   skill: string;
@@ -36,4 +46,5 @@ export interface OrderCardProps {
   status: string;
   date: string;
   reviews: number;
+  orderId: string; // Add this new prop
 }

@@ -38,6 +38,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+//order
+try{
+const newNotification = new Notification({
+  type: 'New Order',
+  message: `New order created: ${savedOrder.workTitle} (${savedOrder.category}) - $${savedOrder.rate}`,
+  userId: savedOrder.buyerId,
+  orderId: savedOrder.id,
+  read: false,
+  createdAt: new Date(),
+  updatedAt: new Date()
+});
+
+await newNotification.save();
+
+res.status(201).json(savedOrder);
+} catch (error) {
+res.status(400).json({ error: error.message });
+}
+
+
 // Mark a notification as read
 router.patch('/:id', async (req, res) => {
   try {
@@ -60,30 +81,6 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-// Create a new notification for a new order
-router.post('/new-order', async (req, res) => {
-  try {
-    const newOrder = await Order.findById(req.body.orderId);
-    if (!newOrder) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    const newNotification = new Notification({
-      type: 'New Order',
-      message: `New order created: ${newOrder.workTitle} (${newOrder.category}) - $${newOrder.rate}`,
-      userId: newOrder.buyerId,
-      orderId: newOrder.id,
-      read: false,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-
-    const savedNotification = await newNotification.save();
-    res.status(201).json(savedNotification);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
 
 
 export default router;

@@ -95,6 +95,7 @@ export default function Bought() {
               status={order.status}
               date={new Date(order.createdAt).toLocaleDateString()}
               reviews={order.Review?.length || 0}
+              orderId={order.id}
             />
           ))}
         </div>

@@ -114,6 +114,46 @@ model Order {
 
   seller User?    @relation("SellerOrders", fields: [sellerId], references: [id])
   Review Review[]
+
+  purchasedOrders PurchasedOrder[] @relation("OrderPurchasedOrders")
+}
+
+model PurchasedOrder {
+  id            String   @id @default(cuid()) @map("_id")
+  orderId       String
+  purchaseDate  DateTime @default(now())
+  status        String   @default("pending")
+
+  order         Order    @relation("OrderPurchasedOrders", fields: [orderId], references: [id])
+  payment       Payment[] @relation("OrderPayment")
+}
+
+model Payment {
+  id                     String   @id @default(cuid()) @map("_id") // Unique ID
+  transactionId          String   @unique
+  productId              String
+  amount                 Float    // Numeric field for the payment amount
+  dataFromVerificationReq Json?   // Optional JSON field for verification data
+  apiQueryFromUser       Json?    // Optional JSON field for user query data
+  paymentGateway         PaymentGateway // Enum for payment gateways
+  status                 PaymentStatus  @default(PENDING) // Enum for payment status with a default value
+  paymentDate            DateTime @default(now())
+  createdAt              DateTime @default(now()) 
+  updatedAt              DateTime @updatedAt     
+
+  purchasedOrder         PurchasedOrder   @relation("OrderPayment", fields: [productId], references: [id])
+}
+
+enum PaymentGateway {
+  KHALTI
+  ESEWA
+  CONNECTIPS
+}
+
+enum PaymentStatus {
+  SUCCESS
+  PENDING
+  FAILED
 }
 
 model Messages {
@@ -124,6 +164,25 @@ model Messages {
   file        String?
   timestamp   DateTime
 }
+
+
+
+
+
+// model Notification {
+//   id        String   @id @default(cuid()) @map("_id")
+//   userId    String
+//   message   String
+//   type      String
+//   link      String?
+//   isRead    Boolean  @default(false)
+//   date      DateTime @default(now())
+//   updatedAt DateTime @updatedAt // Automatically tracks last update time
+//   orderId   String? 
+//   order     Order?   @relation(fields: [orderId], references: [id])
+// 
+//   user      User     @relation(fields: [userId], references: [id])
+// }
 
 
 model Notification {

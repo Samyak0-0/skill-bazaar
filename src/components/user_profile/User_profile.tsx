@@ -16,51 +16,26 @@ import Image from "next/image";
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
-  const [isEditing, setIsEditing] = useState(false); // Track if in edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [newSkill, setNewSkill] = useState("");
+  const [newInterest, setNewInterest] = useState("");
 
   const { data } = useSession();
 
-  useEffect(() => {
-    if (!data?.user?.email) return;
-
-    const getInterests = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/interests?userMail=${data?.user?.email}`
-        );
-
-        if (!response.ok) {
-          console.error("Failed to fetch interests:", response.statusText);
-          return null;
-        }
-
-        const apiData = await response.json();
-        // console.log("Interests:", data.skills);
-
-        setUserData((prev) => ({ ...prev, interests: apiData.interests }));
-        setUserData((prev) => ({ ...prev, skills: apiData.skills }));
-      } catch (error) {
-        console.error("Error fetching interests:", error);
-        return null;
-      }
+  const [userData, setUserData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+    avatar: string;
+    skills: string[];
+    interests: string[];
+    finances: {
+      earnings: number;
+      pendingPayments: number;
+      completedJobs: number;
     };
-    getInterests();
-  }, [data?.user?.email]);
-
-  useEffect(() => {
-    if (!data?.user?.email) return;
-
-    console.log(data.user.image);
-
-    setUserData((prev) => ({
-      ...prev,
-      name: data?.user?.name || "lorem",
-      avatar: data?.user?.image || "ipsum",
-      email: data?.user?.email || "yay",
-    }));
-  }, [data?.user?.email]);
-
-  const [userData, setUserData] = useState({
+  }>({
     name: "",
     email: "",
     phone: "0123456789",
@@ -75,11 +50,82 @@ const UserProfile = () => {
     },
   });
 
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-    // Here, you can save the updated data (for example, send it to the server)
-    console.log("Profile updated", userData);
+  useEffect(() => {
+    if (!data?.user?.email) return;
+
+    const getInterests = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/interests?userMail=${data.user.email}`
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch interests:", response.statusText);
+          return null;
+        }
+
+        const apiData = await response.json();
+        setUserData((prev) => ({
+          ...prev,
+          interests: apiData.interests || [],
+          skills: apiData.skills || [],
+        }));
+      } catch (error) {
+        console.error("Error fetching interests:", error);
+        return null;
+      }
+    };
+    getInterests();
+  }, [data?.user?.email]);
+
+  useEffect(() => {
+    if (!data?.user?.email) return;
+
+    setUserData((prev) => ({
+      ...prev,
+      name: data.user.name || "lorem",
+      avatar: data.user.image || "ipsum",
+      email: data.user.email || "yay",
+    }));
+  }, [data?.user?.email]);
+  const handleAddSkill = async () => {
+    if (!newSkill || !data?.user?.email) return; // Ensure 'data' and 'data.user.email' exist
+  
+    setUserData((prev) => ({
+      ...prev,
+      skills: [...prev.skills, newSkill],
+    }));
+  
+    await fetch(`http://localhost:3000/api/add-skill`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userMail: data.user.email, skill: newSkill }),
+    });
+  
+    setNewSkill(""); // Clear input
   };
+  
+const handleAddInterest = async () => {
+  if (!newInterest || !data?.user?.email) return; // Ensure 'data' and 'data.user.email' exist
+
+  setUserData((prev) => ({
+    ...prev,
+    interests: [...prev.interests, newInterest],
+  }));
+
+  await fetch(`http://localhost:3000/api/add-interest`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userMail: data.user.email, interest: newInterest }),
+  });
+
+  setNewInterest(""); // Clear input
+};
+
 
   const ProfileView = () => (
     <div className="space-y-6">
@@ -166,7 +212,7 @@ const UserProfile = () => {
 
   const SkillsView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">My Skills</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">My Skills</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {userData.skills.map((skill) => (
@@ -178,16 +224,28 @@ const UserProfile = () => {
             </span>
           ))}
         </div>
-        <button className="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50">
-          Add New Skill
-        </button>
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            placeholder="Add new skill"
+            className="border rounded p-2"
+          />
+          <button
+            onClick={handleAddSkill}
+            className="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50"
+          >
+            Add Skill
+          </button>
+        </div>
       </div>
     </div>
   );
 
   const InterestsView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">My Interests</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {userData?.interests.map((interest) => (
@@ -199,16 +257,28 @@ const UserProfile = () => {
             </span>
           ))}
         </div>
-        <button className="px-4 py-2 border border-green-500 text-green-500 rounded-lg hover:bg-green-50">
-          Add New Interest
-        </button>
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            value={newInterest}
+            onChange={(e) => setNewInterest(e.target.value)}
+            placeholder="Add new interest"
+            className="border rounded p-2"
+          />
+          <button
+            onClick={handleAddInterest}
+            className="px-4 py-2 border border-green-500 text-green-500 rounded-lg hover:bg-green-50"
+          >
+            Add Interest
+          </button>
+        </div>
       </div>
     </div>
   );
 
   const FinancesView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4">Financial Overview</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">Financial Overview</h3>
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-600">Total Earnings</p>

@@ -37,7 +37,7 @@
     "src/utilities/**/*.ts", // Include all utilities as TypeScript files
     "src/utilities/auth.js", // Ensure auth file is treated as TypeScript
     "src/utilities/prisma.ts"
-, "src/components/order/bought.jsx"  ],
+, "src/components/order/bought.jsx", "src/components/user_profile/User_profile.jsx"  ],
   "exclude": [
     "node_modules"
   ] // Exclude node_modules to prevent unnecessary file checks
