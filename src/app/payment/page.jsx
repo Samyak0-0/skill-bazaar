@@ -8,7 +8,7 @@ const page = () => {
         method="POST"
         className="flex flex-col"
       >
-        <input type="text" id="amount" name="amount" value="900" required />
+        <input type="text" id="amount" name="amount" value="7700" required />
         <input
           type="text"
           id="tax_amount"
@@ -20,14 +20,14 @@ const page = () => {
           type="text"
           id="total_amount"
           name="total_amount"
-          value="900"
+          value="7700"
           required
         />
         <input
           type="text"
           id="transaction_uuid"
           name="transaction_uuid"
-          value="cm6gihmel001zu8rweu8inl6v"
+          value="cm6qcfl420001u8igejzrbvsa"
           className="bg-green-400"
           required
         />
@@ -78,7 +78,7 @@ const page = () => {
           id="signature"
           name="signature"
           className="bg-red-500"
-          value="83AYDtSjjHpji6nxOgnpVm5UdkG2NZSlTnSP6Gikx5E="
+          value="h/FCqYys3DcWJK1eVKX9JaIRocAqY+FW0aGVEpTIxwU="
           required
         />
         <input value="Submit" type="submit" />

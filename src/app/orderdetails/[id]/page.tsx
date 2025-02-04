@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
 interface OrderData {
@@ -17,6 +17,11 @@ interface Comment {
   date: string;
   rating: string;
   content: string;
+}
+
+interface OrderData {
+  rate: string;
+  id: string;
 }
 
 const OrderDetailPage = () => {
@@ -65,6 +70,70 @@ const OrderDetailPage = () => {
     fetchOrderDetails();
   }, [params?.id]);
 
+  const handlePayment = async (
+    rate: string,
+    orderId: string
+  ): Promise<void> => {
+    try {
+      const rateAmt = parseInt(rate.match(/\d+/)?.[0] || "0", 10);
+      const requestData = {
+        itemId: orderId,
+        totalPrice: rateAmt,
+      };
+
+      const response = await fetch("http://localhost:3000/api/esewa-payment", {
+        method: "POST",
+        body: JSON.stringify(requestData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Payment request failed:", response.status, response.statusText);
+        throw new Error(`Payment request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data?.purchasedItemData?.id || !data?.payment?.signature) {
+        throw new Error("Missing payment data from response.");
+      }
+  
+
+      const form = document.createElement("form");
+      form.action = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+      form.method = "POST";
+
+      const formData = {
+        amount: `${rateAmt}`,
+        tax_amount: "0",
+        total_amount: `${rateAmt}`,
+        transaction_uuid: `${data.purchasedItemData.id}`,
+        product_code: "EPAYTEST",
+        product_service_charge: "0",
+        product_delivery_charge: "0",
+        success_url: "http://localhost:3000/api/esewa-payment",
+        failure_url: "https://developer.esewa.com.np/failure",
+        signed_field_names: "total_amount,transaction_uuid,product_code",
+        signature: `${data.payment.signature}`,
+      };
+
+      for (const [key, value] of Object.entries(formData)) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+    } catch (error) {
+      console.error("Error during payment processing:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto p-6 flex justify-center items-center">
@@ -107,11 +176,18 @@ const OrderDetailPage = () => {
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-6">
+        <div className="border-t border-gray-200 pt-6 flex justify-between">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-2xl font-bold text-gray-600">Rating:</h2>
             <span className="text-2xl text-yellow-500">4/5</span>
           </div>
+
+          <button
+            onClick={() => handlePayment(orderData.rate, orderData.id)}
+            className="w-1/3 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold transition duration-300 flex items-center justify-center gap-2"
+          >
+            Buy Now <ShoppingCart />
+          </button>
         </div>
       </div>
 
