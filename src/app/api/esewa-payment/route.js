@@ -11,8 +11,6 @@ export async function GET(req) {
     // Verify payment with eSewa
     const paymentInfo = await verifyEsewaPayment(data);
 
-    // console.log(paymentInfo)
-
     // Find the purchased item using the transaction UUID
     const purchasedItemData = await prisma.purchasedOrder.findUnique({
       where: { id: paymentInfo.response.transaction_uuid },
