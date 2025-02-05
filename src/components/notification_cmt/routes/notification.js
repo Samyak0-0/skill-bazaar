@@ -1,6 +1,6 @@
 import express from 'express';
 import Notification from '../models/Notification.js';
-import Order from '../models/order.js'; // Import the Order model
+//import Order from '../models/order.js'; // Import the Order model
 
 const router = express.Router();
 
@@ -43,7 +43,7 @@ router.post('/', async (req, res) => {
 try{
 const newNotification = new Notification({
   type: 'New Order',
-  message: `New order created: ${savedOrder.workTitle} (${savedOrder.category}) - $${savedOrder.rate}`,
+  message: `You have new Order: ${savedOrder.workTitle} (${savedOrder.category}) - $${savedOrder.rate}`,
   userId: savedOrder.buyerId,
   orderId: savedOrder.id,
   read: false,
