@@ -59,7 +59,7 @@ res.status(400).json({ error: error.message });
 }
 
 
-// Mark a notification as read
+// Marks a notification as read when you click 
 router.patch('/:id', async (req, res) => {
   try {
     const notification = await Notification.findByIdAndUpdate(
@@ -72,7 +72,7 @@ router.patch('/:id', async (req, res) => {
     );
 
     if (!notification) {
-      return res.status(404).json({ message: 'Notification not found' });
+      return res.status(404).json({ message: 'Notification is not found' });
     }
 
     res.json(notification);
