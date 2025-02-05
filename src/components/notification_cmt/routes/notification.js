@@ -40,23 +40,23 @@ router.post('/', async (req, res) => {
 
 
 //order
-try{
-const newNotification = new Notification({
-  type: 'New Order',
-  message: `You have new Order: ${savedOrder.workTitle} (${savedOrder.category}) - $${savedOrder.rate}`,
-  userId: savedOrder.buyerId,
-  orderId: savedOrder.id,
-  read: false,
-  createdAt: new Date(),
-  updatedAt: new Date()
-});
+// try{
+// const newNotification = new Notification({
+//   type: 'New Order',
+//   message: `You have a new Order: ${savedOrder.workTitle} (${savedOrder.category}) - $${savedOrder.rate}`,
+//   userId: savedOrder.buyerId,
+//   orderId: savedOrder.id,
+//   read: false,
+//   createdAt: new Date(),
+//   updatedAt: new Date()
+// });
 
-await newNotification.save();
+// await newNotification.save();
 
-res.status(201).json(savedOrder);
-} catch (error) {
-res.status(400).json({ error: error.message });
-}
+// res.status(201).json(savedOrder);
+// } catch (error) {
+// res.status(400).json({ error: error.message });
+// }
 
 
 // Marks a notification as read when you click 

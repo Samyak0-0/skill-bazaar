@@ -49,11 +49,11 @@ export async function POST(req: Request) {
       },
     });
 
-  // Create a notification for the new order
+  // Create a notification for the new order -- added this only 
   await prisma.notification.create({
     data: {
       type: 'New Order',
-      message: `You have order for ${workTitle} (${category}) - ${rate}`,
+      message: `You have new order for ${workTitle} (${category}) - ${rate}`,
       userId: sellerId || buyerId || '', // Use sellerId or buyerId
       orderId: order.id,
       read: false

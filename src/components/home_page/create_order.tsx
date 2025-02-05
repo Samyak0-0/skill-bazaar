@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+
 
 type Props = {}
 
@@ -14,6 +17,8 @@ interface OrderData {
 }
 
 const Create_order = (props: Props) => {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [formData, setFormData] = useState<OrderData>({
     workTitle: '',
     description: '',
@@ -28,6 +33,27 @@ const Create_order = (props: Props) => {
 
   const categories = ['Education', 'Programming', 'Writing', 'Design', 'Marketing'];
 
+  // const createNotification = async (orderId: string) => {
+  //   try {
+  //     await fetch('/api/notifications', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         type: 'New Order',
+  //         message: `New order created: ${formData.workTitle} (${formData.category}) - ${formData.rate}`,
+  //         userId: session?.user?.id,
+  //         orderId: orderId
+  //       }),
+  //     });
+  //   } catch (error) {
+  //     console.error('Error creating notification:', error);
+  //   }
+  // };
+
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -41,6 +67,8 @@ const Create_order = (props: Props) => {
       });
 
       if (response.ok) {
+        const order = await response.json();
+        //await createNotification(order.id);
         setFormData({
           workTitle: '',
           description: '',
@@ -51,6 +79,7 @@ const Create_order = (props: Props) => {
           sellerId: '',
           status: 'PENDING'
         });
+        router.push('/orders');
         alert('Order created successfully!');
       } else {
         throw new Error('Failed to create order');

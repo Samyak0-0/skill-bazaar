@@ -48,16 +48,15 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  Notification  String[]
   contacts      String[]
   skills        String[]
   interests     String[]
 
-  services     Service[] @relation("UserServices")
-  buyerOrders  Order[]   @relation("BuyerOrders")
-  sellerOrders Order[]   @relation("SellerOrders")
-
-  reviews Review[] @relation("UserReviews")
+  services      Service[]      @relation("UserServices")
+  buyerOrders   Order[]        @relation("BuyerOrders")
+  sellerOrders  Order[]        @relation("SellerOrders")
+  reviews       Review[]       @relation("UserReviews")
+  notifications Notification[] @relation("UserNotifications") // Fixed relation reference
 }
 
 //  messages Messages[] @relation("UserMessages")
@@ -94,54 +93,49 @@ model Review {
 }
 
 model Order {
-  id        String @id @default(cuid()) @map("_id")
-  serviceId String
-
+  id          String   @id @default(cuid()) @map("_id")
+  serviceId   String
   workTitle   String?
   description String?
   rate        String?
   category    String?
   createdAt   DateTime @default(now())
+  buyerId     String?
+  sellerId    String?
+  status      String
 
-  buyerId  String?
-  sellerId String?
-
-  status String
-
-  service Service? @relation("ServiceOrders", fields: [serviceId], references: [id])
-
-  buyer User? @relation("BuyerOrders", fields: [buyerId], references: [id])
-
-  seller User?    @relation("SellerOrders", fields: [sellerId], references: [id])
-  Review Review[]
-
+  service         Service?         @relation("ServiceOrders", fields: [serviceId], references: [id])
+  buyer           User?            @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller          User?            @relation("SellerOrders", fields: [sellerId], references: [id])
+  Review          Review[]
   purchasedOrders PurchasedOrder[] @relation("OrderPurchasedOrders")
+  notifications   Notification[]   @relation("OrderNotifications")
 }
 
 model PurchasedOrder {
-  id            String   @id @default(cuid()) @map("_id")
-  orderId       String
-  purchaseDate  DateTime @default(now())
-  status        String   @default("pending")
+  id           String   @id @default(cuid()) @map("_id")
+  orderId      String
+  purchaseDate DateTime @default(now())
+  status       String   @default("pending")
 
-  order         Order    @relation("OrderPurchasedOrders", fields: [orderId], references: [id])
-  payment       Payment[] @relation("OrderPayment")
+  order   Order     @relation("OrderPurchasedOrders", fields: [orderId], references: [id])
+  payment Payment[] @relation("OrderPayment")
 }
 
 model Payment {
-  id                     String   @id @default(cuid()) @map("_id") // Unique ID
-  transactionId          String   @unique
-  productId              String
-  amount                 Float    // Numeric field for the payment amount
-  dataFromVerificationReq Json?   // Optional JSON field for verification data
-  apiQueryFromUser       Json?    // Optional JSON field for user query data
-  paymentGateway         PaymentGateway // Enum for payment gateways
-  status                 PaymentStatus  @default(PENDING) // Enum for payment status with a default value
-  paymentDate            DateTime @default(now())
-  createdAt              DateTime @default(now()) 
-  updatedAt              DateTime @updatedAt     
+  id                      String         @id @default(cuid()) @map("_id") // Unique ID
+  transactionId           String         @unique
+  productId               String
+  amount                  Float // Numeric field for the payment amount
+  dataFromVerificationReq Json? // Optional JSON field for verification data
+  apiQueryFromUser        Json? // Optional JSON field for user query data
+  paymentGateway          PaymentGateway // Enum for payment gateways
+  status                  PaymentStatus  @default(PENDING) // Enum for payment status with a default value
+  paymentDate             DateTime       @default(now())
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
 
-  purchasedOrder         PurchasedOrder   @relation("OrderPayment", fields: [productId], references: [id])
+  purchasedOrder PurchasedOrder @relation("OrderPayment", fields: [productId], references: [id])
 }
 
 enum PaymentGateway {
@@ -165,17 +159,18 @@ model Messages {
   timestamp   DateTime
 }
 
-
-
 model Notification {
-  _id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid()) @map("_id")
   type      String
   message   String
-  userId    String   
-  read      Boolean  @default(false) @map("isRead")  // Map to match MongoDB field
-  createdAt DateTime @default(now()) @map("date")    // Map to match MongoDB field
+  userId    String
+  read      Boolean  @default(false) @map("isRead")
+  createdAt DateTime @default(now()) @map("date")
   updatedAt DateTime @default(now()) @map("updatedAt")
-  orderId   String?  // Optional field
+  orderId   String?
 
-  @@map("Notification")  
+  order Order? @relation("OrderNotifications", fields: [orderId], references: [id])
+  user  User   @relation("UserNotifications", fields: [userId], references: [id])
+
+  @@map("Notification")
 }
