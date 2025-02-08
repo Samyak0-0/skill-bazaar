@@ -115,7 +115,7 @@ const handleAddInterest = async () => {
     interests: [...prev.interests, newInterest],
   }));
 
-  await fetch(`http://localhost:3000/api/add-interest`, {
+  await fetch(`http://localhost:3000/api/add-interests`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
