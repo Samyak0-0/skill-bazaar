@@ -5,6 +5,7 @@ import { prisma } from "@/utilities/prisma";
 export async function POST(req) {
   try {
     const { userMail, interest } = await req.json();
+    console.log(userMail, interest)
 
     if (!userMail || !interest) {
       return NextResponse.json(

@@ -38,8 +38,8 @@ const UserProfile = () => {
   }>({
     name: "",
     email: "",
-    phone: "0123456789",
-    location: "Dhulikhel, Nepal",
+    phone: "",
+    location: "",
     avatar: "https://plus.unsplash.com/premium_photo-1701090939615-1794bbac5c06?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z3JheSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D",
     skills: [],
     interests: [],
@@ -115,7 +115,7 @@ const handleAddInterest = async () => {
     interests: [...prev.interests, newInterest],
   }));
 
-  await fetch(`http://localhost:3000/api/add-interest`, {
+  await fetch(`http://localhost:3000/api/add-interests`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
