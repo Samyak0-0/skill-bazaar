@@ -8,14 +8,38 @@ const prisma = new PrismaClient();
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ id: string }> } // params is now a Promise
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const resolvedParams = await context.params; // Unwrap the Promise
+    const resolvedParams = await context.params;
 
     const order = await prisma.order.findUnique({
       where: {
-        id: resolvedParams.id, // Use the unwrapped params
+        id: resolvedParams.id,
+      },
+      include: {
+        Review: {
+          include: {
+            reviewer: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        buyer: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
+        seller: {
+          select: {
+            name: true,
+            image: true,
+          },
+        },
       },
     });
 
@@ -23,7 +47,15 @@ export async function GET(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    return NextResponse.json(order);
+    // Calculate average rating
+    const averageRating = order.Review.length > 0
+      ? (order.Review.reduce((sum, review) => sum + review.rating, 0) / order.Review.length).toFixed(1)
+      : "No ratings yet";
+
+    return NextResponse.json({
+      ...order,
+      averageRating,
+    });
   } catch (error) {
     console.error("Error fetching order details:", error);
     return NextResponse.json(
@@ -32,3 +64,34 @@ export async function GET(
     );
   }
 }
+// import { NextResponse } from "next/server";
+// import { PrismaClient } from "@prisma/client";
+
+// const prisma = new PrismaClient();
+
+// export async function GET(
+//   req: Request,
+//   context: { params: Promise<{ id: string }> } // params is now a Promise
+// ) {
+//   try {
+//     const resolvedParams = await context.params; // Unwrap the Promise
+
+//     const order = await prisma.order.findUnique({
+//       where: {
+//         id: resolvedParams.id, // Use the unwrapped params
+//       },
+//     });
+
+//     if (!order) {
+//       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+//     }
+
+//     return NextResponse.json(order);
+//   } catch (error) {
+//     console.error("Error fetching order details:", error);
+//     return NextResponse.json(
+//       { error: "Failed to fetch order details" },
+//       { status: 500 }
+//     );
+//   }
+// }
