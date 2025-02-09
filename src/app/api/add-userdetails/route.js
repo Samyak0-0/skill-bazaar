@@ -15,7 +15,7 @@ export async function POST(req) {
       where: { email: userMail },
       data: {
         location: location,
-        phone: [phone], // Since phone is an array in the schema
+        phone: phone, // Since phone is an array in the schema
       },
     });
 

@@ -150,7 +150,7 @@ const UserProfile = () => {
     if (!data?.user?.email) return;
 
     try {
-      const response = await fetch('/api/update-profile', {
+      const response = await fetch('http://localhost:3000/api/add-userdetails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ const UserProfile = () => {
                 placeholder="Enter phone number"
               />
             ) : (
-              <span>{userData.phone || "No phone number added"}</span>
+              <span>{userData.phone || " . . . "}</span>
             )}
           </div>
         </div>
@@ -255,7 +255,7 @@ const UserProfile = () => {
                 placeholder="Enter location"
               />
             ) : (
-              <span>{userData.location || "No location added"}</span>
+              <span>{userData.location || ". . ."}</span>
             )}
           </div>
         </div>
