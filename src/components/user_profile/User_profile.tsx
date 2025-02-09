@@ -1,4 +1,4 @@
-"use client"; // Add this directive at the top
+"use client";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -14,33 +14,34 @@ import {
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
+interface UserData {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  avatar: string;
+  skills: string[];
+  interests: string[];
+  finances: {
+    earnings: number;
+    pendingPayments: number;
+    completedJobs: number;
+  };
+}
+
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
-
   const { data } = useSession();
 
-  const [userData, setUserData] = useState<{
-    name: string;
-    email: string;
-    phone: string;
-    location: string;
-    avatar: string;
-    skills: string[];
-    interests: string[];
-    finances: {
-      earnings: number;
-      pendingPayments: number;
-      completedJobs: number;
-    };
-  }>({
+  const [userData, setUserData] = useState<UserData>({
     name: "",
     email: "",
-    phone: "0123456789",
-    location: "Dhulikhel, Nepal",
-    avatar: "https://plus.unsplash.com/premium_photo-1701090939615-1794bbac5c06?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z3JheSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D",
+    phone: "",
+    location: "",
+    avatar: "",
     skills: [],
     interests: [],
     finances: {
@@ -53,86 +54,130 @@ const UserProfile = () => {
   useEffect(() => {
     if (!data?.user?.email) return;
 
-    const getInterests = async () => {
+    const fetchUserData = async () => {
       try {
         const response = await fetch(
           `http://localhost:3000/api/interests?userMail=${data.user.email}`
         );
 
         if (!response.ok) {
-          console.error("Failed to fetch interests:", response.statusText);
-          return null;
+          console.error("Failed to fetch user data:", response.statusText);
+          return;
         }
 
         const apiData = await response.json();
-        setUserData((prev) => ({
+        setUserData(prev => ({
           ...prev,
           interests: apiData.interests || [],
           skills: apiData.skills || [],
+          location: apiData.location || "",
+          phone: Array.isArray(apiData.phone) ? apiData.phone[0] : apiData.phone || "",
         }));
       } catch (error) {
-        console.error("Error fetching interests:", error);
-        return null;
+        console.error("Error fetching user data:", error);
       }
     };
-    getInterests();
+
+    fetchUserData();
   }, [data?.user?.email]);
 
   useEffect(() => {
     if (!data?.user?.email) return;
 
-    setUserData((prev) => ({
+    setUserData(prev => ({
       ...prev,
-      name: data.user.name || "lorem",
-      avatar: data.user.image || "ipsum",
-      email: data.user.email || "yay",
+      name: data.user.name || "",
+      avatar: data.user.image || "",
+      email: data.user.email || "",
     }));
   }, [data?.user?.email]);
+
   const handleAddSkill = async () => {
-    if (!newSkill || !data?.user?.email) return; // Ensure 'data' and 'data.user.email' exist
-  
-    setUserData((prev) => ({
-      ...prev,
-      skills: [...prev.skills, newSkill],
-    }));
-  
-    await fetch(`http://localhost:3000/api/add-skill`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userMail: data.user.email, skill: newSkill }),
-    });
-  
-    setNewSkill(""); // Clear input
+    if (!newSkill || !data?.user?.email) return;
+
+    try {
+      const response = await fetch(`http://localhost:3000/api/add-skill`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userMail: data.user.email, skill: newSkill }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add skill');
+      }
+
+      setUserData(prev => ({
+        ...prev,
+        skills: [...prev.skills, newSkill],
+      }));
+
+      setNewSkill("");
+    } catch (error) {
+      console.error("Error adding skill:", error);
+    }
   };
-  
-const handleAddInterest = async () => {
-  if (!newInterest || !data?.user?.email) return; // Ensure 'data' and 'data.user.email' exist
 
-  setUserData((prev) => ({
-    ...prev,
-    interests: [...prev.interests, newInterest],
-  }));
+  const handleAddInterest = async () => {
+    if (!newInterest || !data?.user?.email) return;
 
-  await fetch(`http://localhost:3000/api/add-interests`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ userMail: data.user.email, interest: newInterest }),
-  });
+    try {
+      const response = await fetch(`http://localhost:3000/api/add-interests`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userMail: data.user.email, interest: newInterest }),
+      });
 
-  setNewInterest(""); // Clear input
-};
+      if (!response.ok) {
+        throw new Error('Failed to add interest');
+      }
 
+      setUserData(prev => ({
+        ...prev,
+        interests: [...prev.interests, newInterest],
+      }));
+
+      setNewInterest("");
+    } catch (error) {
+      console.error("Error adding interest:", error);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!data?.user?.email) return;
+
+    try {
+      const response = await fetch('/api/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userMail: data.user.email,
+          location: userData.location,
+          phone: userData.phone,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
 
   const ProfileView = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            {data?.user?.image && (
+            {userData.avatar && (
               <Image
                 src={userData.avatar}
                 alt={userData.name}
@@ -153,7 +198,7 @@ const handleAddInterest = async () => {
                 onChange={(e) =>
                   setUserData({ ...userData, name: e.target.value })
                 }
-                className="text-2xl font-semibold text-gray-900"
+                className="text-2xl font-semibold text-gray-900 border rounded px-2"
               />
             ) : (
               <h2 className="text-2xl font-semibold text-gray-900">
@@ -164,7 +209,13 @@ const handleAddInterest = async () => {
           </div>
         </div>
         <button
-          onClick={() => setIsEditing(!isEditing)} // Toggle edit mode
+          onClick={() => {
+            if (isEditing) {
+              handleSaveProfile();
+            } else {
+              setIsEditing(true);
+            }
+          }}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
           {isEditing ? "Save Profile" : "Edit Profile"}
@@ -182,10 +233,11 @@ const handleAddInterest = async () => {
                 onChange={(e) =>
                   setUserData({ ...userData, phone: e.target.value })
                 }
-                className="text-gray-600"
+                className="flex-1 border rounded px-2 py-1"
+                placeholder="Enter phone number"
               />
             ) : (
-              <span>{userData.phone}</span>
+              <span>{userData.phone || "No phone number added"}</span>
             )}
           </div>
         </div>
@@ -199,10 +251,11 @@ const handleAddInterest = async () => {
                 onChange={(e) =>
                   setUserData({ ...userData, location: e.target.value })
                 }
-                className="text-gray-600"
+                className="flex-1 border rounded px-2 py-1"
+                placeholder="Enter location"
               />
             ) : (
-              <span>{userData.location}</span>
+              <span>{userData.location || "No location added"}</span>
             )}
           </div>
         </div>
@@ -248,7 +301,7 @@ const handleAddInterest = async () => {
       <h3 className="text-xl font-medium mb-4 text-gray-800">My Interests</h3>
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          {userData?.interests.map((interest) => (
+          {userData.interests.map((interest) => (
             <span
               key={interest}
               className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
@@ -305,18 +358,8 @@ const handleAddInterest = async () => {
   const tabs = [
     { id: "profile", label: "Profile", icon: User, component: ProfileView },
     { id: "skills", label: "Skills", icon: Settings, component: SkillsView },
-    {
-      id: "interests",
-      label: "Interests",
-      icon: Heart,
-      component: InterestsView,
-    },
-    {
-      id: "finances",
-      label: "Finances",
-      icon: Wallet,
-      component: FinancesView,
-    },
+    { id: "interests", label: "Interests", icon: Heart, component: InterestsView },
+    { id: "finances", label: "Finances", icon: Wallet, component: FinancesView },
   ];
 
   return (

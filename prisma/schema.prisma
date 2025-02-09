@@ -48,9 +48,10 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  contacts      String[]
+  phone         String[]
   skills        String[]
   interests     String[]
+  location      String?
 
   services      Service[]      @relation("UserServices")
   buyerOrders   Order[]        @relation("BuyerOrders")
