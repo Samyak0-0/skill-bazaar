@@ -1,26 +1,33 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@/lib/prisma";
+// app/api/update-profile/route.ts
+import { NextResponse } from "next/server";
+import { prisma } from "@/utilities/prisma";
 
 export async function POST(req) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { userMail, location, phone } = req.body;
-
-  if (!userMail) {
-    return res.status(400).json({ error: "Missing userMail" });
-  }
-
   try {
+    const { userMail, location, phone } = await req.json();
+
+    if (!userMail) {
+      return NextResponse.json({ error: "User email is required" }, { status: 400 });
+    }
+
+    // Update user in the database
     const updatedUser = await prisma.user.update({
       where: { email: userMail },
-      data: { location, phone },
+      data: {
+        location: location,
+        phone: [phone], // Since phone is an array in the schema
+      },
     });
 
-    res.status(200).json(updatedUser);
+    return NextResponse.json({
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
   } catch (error) {
-    console.error("Error updating user details:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error updating profile:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
