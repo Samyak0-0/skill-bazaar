@@ -11,6 +11,8 @@ import {
   Camera,
   Heart,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
+
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -388,14 +390,13 @@ const UserProfile = () => {
           </div>
 
           {tabs.find((tab) => tab.id === activeTab)?.component()}
-
           <button
-            onClick={() => console.log("Logout")}
-            className="mt-8 flex items-center text-red-500 hover:text-red-600"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            <span>Log out</span>
-          </button>
+  onClick={() => signOut()}
+  className="mt-8 flex items-center text-red-500 hover:text-red-600"
+>
+  <LogOut className="w-4 h-4 mr-2" />
+  <span>Log out</span>
+</button>
         </div>
       </div>
     </div>
