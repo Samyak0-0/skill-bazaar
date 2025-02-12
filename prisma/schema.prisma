@@ -52,12 +52,18 @@ model User {
   skills        String[]
   interests     String[]
   location      String?
+  contacts      String[]
+
+  totalSpending  Float     @default(0.0)
+  totalEarnings  Float     @default(0.0)
 
   services      Service[]      @relation("UserServices")
   buyerOrders   Order[]        @relation("BuyerOrders")
   sellerOrders  Order[]        @relation("SellerOrders")
   reviews       Review[]       @relation("UserReviews")
-  notifications Notification[] @relation("UserNotifications") // Fixed relation reference
+  notifications Notification[] @relation("UserNotifications")
+
+  financialStatements FinancialStatement[]
 }
 
 //  messages Messages[] @relation("UserMessages")
@@ -116,6 +122,7 @@ model Order {
 model PurchasedOrder {
   id           String   @id @default(cuid()) @map("_id")
   orderId      String
+  buyerId      String?
   purchaseDate DateTime @default(now())
   status       String   @default("pending")
 
@@ -174,4 +181,22 @@ model Notification {
   user  User   @relation("UserNotifications", fields: [userId], references: [id])
 
   @@map("Notification")
+}
+
+model FinancialStatement {
+  id          String   @id @default(cuid()) @map("_id")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  date        DateTime @default(now())
+  description String
+  amount      Float
+  type        FinancialType
+
+  @@index([userId, date])
+}
+
+
+enum FinancialType {
+  SPENDINGs
+  EARNINGS
 }

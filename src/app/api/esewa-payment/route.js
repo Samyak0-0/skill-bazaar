@@ -14,7 +14,10 @@ export async function GET(req) {
     // Find the purchased item using the transaction UUID
     const purchasedItemData = await prisma.purchasedOrder.findUnique({
       where: { id: paymentInfo.response.transaction_uuid },
+      include: { order: true },
     });
+
+    console.log(purchasedItemData);
 
     if (!purchasedItemData) {
       return res.status(500).json({
@@ -22,6 +25,8 @@ export async function GET(req) {
         message: "Purchase not found",
       });
     }
+
+    console.log(paymentInfo);
 
     // Create a new payment record in the database
     const paymentData = await prisma.payment.create({
@@ -61,7 +66,7 @@ export async function POST(req, res) {
   //initialize eswea payment
   try {
     const body = await req.json();
-    const { itemId, totalPrice } = body;
+    const { itemId, totalPrice, buyerId } = body;
 
     const itemData = await prisma.order.findUnique({
       where: { id: itemId },
@@ -77,6 +82,7 @@ export async function POST(req, res) {
       data: {
         orderId: itemId,
         status: "PENDING",
+        buyerId: buyerId,
         purchaseDate: new Date(),
       },
     });

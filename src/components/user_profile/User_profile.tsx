@@ -24,7 +24,7 @@ interface UserData {
   interests: string[];
   finances: {
     earnings: number;
-    pendingPayments: number;
+    spendings: number;
     completedJobs: number;
   };
 }
@@ -41,13 +41,14 @@ const UserProfile = () => {
     email: "",
     phone: "",
     location: "",
-    avatar: "https://plus.unsplash.com/premium_photo-1701090939615-1794bbac5c06?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z3JheSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D",
+    avatar:
+      "https://plus.unsplash.com/premium_photo-1701090939615-1794bbac5c06?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Z3JheSUyMGJhY2tncm91bmR8ZW58MHx8MHx8fDA%3D",
     skills: [],
     interests: [],
     finances: {
-      earnings: 5000,
-      pendingPayments: 400,
-      completedJobs: 15,
+      earnings: 0,
+      spendings: 0,
+      completedJobs: 0,
     },
   });
 
@@ -66,12 +67,16 @@ const UserProfile = () => {
         }
 
         const apiData = await response.json();
-        setUserData(prev => ({
+        setUserData((prev) => ({
           ...prev,
           interests: apiData.interests || [],
           skills: apiData.skills || [],
           location: apiData.location || "",
-          phone: Array.isArray(apiData.phone) ? apiData.phone[0] : apiData.phone || "",
+          phone: apiData.phone || "",
+          finances: {
+            ...prev.finances,
+            earnings: apiData.totalEarnings || 0.0,
+          },
         }));
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -84,7 +89,7 @@ const UserProfile = () => {
   useEffect(() => {
     if (!data?.user?.email) return;
 
-    setUserData(prev => ({
+    setUserData((prev) => ({
       ...prev,
       name: data.user.name || "",
       avatar: data.user.image || "",
@@ -105,10 +110,10 @@ const UserProfile = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add skill');
+        throw new Error("Failed to add skill");
       }
 
-      setUserData(prev => ({
+      setUserData((prev) => ({
         ...prev,
         skills: [...prev.skills, newSkill],
       }));
@@ -128,14 +133,17 @@ const UserProfile = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userMail: data.user.email, interest: newInterest }),
+        body: JSON.stringify({
+          userMail: data.user.email,
+          interest: newInterest,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add interest');
+        throw new Error("Failed to add interest");
       }
 
-      setUserData(prev => ({
+      setUserData((prev) => ({
         ...prev,
         interests: [...prev.interests, newInterest],
       }));
@@ -150,25 +158,28 @@ const UserProfile = () => {
     if (!data?.user?.email) return;
 
     try {
-      const response = await fetch('http://localhost:3000/api/add-userdetails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userMail: data.user.email,
-          location: userData.location,
-          phone: userData.phone,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/add-userdetails",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userMail: data.user.email,
+            location: userData.location,
+            phone: userData.phone,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        throw new Error("Failed to update profile");
       }
 
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
     }
   };
 
@@ -331,7 +342,9 @@ const UserProfile = () => {
 
   const FinancesView = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4 text-gray-800">Financial Overview</h3>
+      <h3 className="text-xl font-medium mb-4 text-gray-800">
+        Financial Overview
+      </h3>
       <div className="grid grid-cols-3 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
           <p className="text-sm text-gray-600">Total Earnings</p>
@@ -340,9 +353,9 @@ const UserProfile = () => {
           </p>
         </div>
         <div className="p-4 bg-orange-50 rounded-lg">
-          <p className="text-sm text-gray-600">Pending Payments</p>
+          <p className="text-sm text-gray-600">Total Spendings</p>
           <p className="text-2xl font-semibold text-orange-600">
-            ${userData.finances.pendingPayments}
+            ${userData.finances.spendings}
           </p>
         </div>
         <div className="p-4 bg-green-50 rounded-lg">
@@ -358,8 +371,18 @@ const UserProfile = () => {
   const tabs = [
     { id: "profile", label: "Profile", icon: User, component: ProfileView },
     { id: "skills", label: "Skills", icon: Settings, component: SkillsView },
-    { id: "interests", label: "Interests", icon: Heart, component: InterestsView },
-    { id: "finances", label: "Finances", icon: Wallet, component: FinancesView },
+    {
+      id: "interests",
+      label: "Interests",
+      icon: Heart,
+      component: InterestsView,
+    },
+    {
+      id: "finances",
+      label: "Finances",
+      icon: Wallet,
+      component: FinancesView,
+    },
   ];
 
   return (

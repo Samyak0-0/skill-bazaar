@@ -7,27 +7,40 @@ export async function GET(req) {
     const userMail = searchParams.get("userMail");
 
     if (!userMail) {
-      return NextResponse.json({ error: "User email is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User email is required" },
+        { status: 400 }
+      );
     }
 
     // Fetch user from the database
     const user = await prisma.user.findUnique({
       where: { email: userMail },
-      select: { interests: true, skills: true, location: true, phone: true },
+      select: {
+        interests: true,
+        skills: true,
+        location: true,
+        phone: true,
+        totalSpending: true,
+        totalEarning: true,
+      },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      interests: user.interests, 
-      skills: user.skills, 
+    return NextResponse.json({
+      interests: user.interests,
+      skills: user.skills,
       location: user.location,
-      phone: user.phone 
+      phone: user.phone,
     });
   } catch (error) {
     console.error("Error fetching user details:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
