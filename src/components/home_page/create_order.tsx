@@ -82,7 +82,7 @@ const Create_order = (props: Props) => {
           sellerId: userId,
           status: 'PENDING'
         });
-        router.push('/orders');
+        router.push('/');
         alert('Order created successfully!');
       } else {
         throw new Error('Failed to create order');
