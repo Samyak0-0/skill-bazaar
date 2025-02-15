@@ -109,7 +109,7 @@ const OrderDetailPage = () => {
         product_code: "EPAYTEST",
         product_service_charge: "0",
         product_delivery_charge: "0",
-        success_url: "http://localhost:3000/api/esewa-payment",
+        success_url: "http://localhost:3000/messages",
         failure_url: "https://developer.esewa.com.np/failure",
         signed_field_names: "total_amount,transaction_uuid,product_code",
         signature: `${data.payment.signature}`,

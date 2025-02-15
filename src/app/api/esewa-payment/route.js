@@ -17,8 +17,6 @@ export async function GET(req) {
       include: { order: true },
     });
 
-    console.log(purchasedItemData);
-
     if (!purchasedItemData) {
       return res.status(500).json({
         success: false,
@@ -26,7 +24,38 @@ export async function GET(req) {
       });
     }
 
-    console.log(paymentInfo);
+    const { buyerId } = purchasedItemData;
+    const { sellerId } = purchasedItemData.order;
+
+    // Fetch existing contacts
+    const buyer = await prisma.user.findUnique({
+      where: { id: buyerId },
+      select: { contacts: true },
+    });
+
+    const seller = await prisma.user.findUnique({
+      where: { id: sellerId },
+      select: { contacts: true },
+    });
+
+    // Merge contacts while ensuring uniqueness
+    const updatedBuyerContacts = Array.from(
+      new Set([...(buyer?.contacts || []), sellerId])
+    );
+    const updatedSellerContacts = Array.from(
+      new Set([...(seller?.contacts || []), buyerId])
+    );
+
+    // Update contacts in the database
+    await prisma.user.update({
+      where: { id: buyerId },
+      data: { contacts: updatedBuyerContacts },
+    });
+
+    await prisma.user.update({
+      where: { id: sellerId },
+      data: { contacts: updatedSellerContacts },
+    });
 
     // Create a new payment record in the database
     const paymentData = await prisma.payment.create({
