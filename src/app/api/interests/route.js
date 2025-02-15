@@ -5,6 +5,7 @@ export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const userMail = searchParams.get("userMail");
+    const userId = searchParams.get("userId");
 
     if (!userMail) {
       return NextResponse.json(
@@ -22,7 +23,7 @@ export async function GET(req) {
         location: true,
         phone: true,
         totalSpending: true,
-        totalEarning: true,
+        totalEarnings: true,
       },
     });
 
@@ -30,11 +31,23 @@ export async function GET(req) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const totalCompletedOrders = await prisma.purchasedOrder.count({
+      where: {
+        status: "COMPLETED",
+        order: {
+          sellerId: userId,
+        },
+      },
+    });
+   
     return NextResponse.json({
       interests: user.interests,
       skills: user.skills,
       location: user.location,
       phone: user.phone,
+      totalEarnings: user.totalEarnings,
+      totalSpending: user.totalSpending,
+      completedOrders: totalCompletedOrders,
     });
   } catch (error) {
     console.error("Error fetching user details:", error);

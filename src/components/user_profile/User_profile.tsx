@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Settings,
   LogOut,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { MessagingContext } from "@/provider/MessagingContext";
 
 interface UserData {
   name: string;
@@ -35,6 +36,7 @@ const UserProfile = () => {
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const { data } = useSession();
+  const { userId, setUserId } = useContext(MessagingContext);
 
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -57,8 +59,11 @@ const UserProfile = () => {
 
     const fetchUserData = async () => {
       try {
+        const responsee = await fetch(`/api/userId?mail=${data.user.email}`);
+        const result = await responsee.json();
+
         const response = await fetch(
-          `http://localhost:3000/api/interests?userMail=${data.user.email}`
+          `http://localhost:3000/api/interests?userMail=${data.user.email}&userId=${result.userId}`
         );
 
         if (!response.ok) {
@@ -76,6 +81,8 @@ const UserProfile = () => {
           finances: {
             ...prev.finances,
             earnings: apiData.totalEarnings || 0.0,
+            spendings: apiData.totalSpending || 0.0,
+            completedJobs: apiData.completedOrders || 0,
           },
         }));
       } catch (error) {

@@ -46,17 +46,22 @@ export async function GET(req) {
       new Set([...(seller?.contacts || []), buyerId])
     );
 
-    // Update contacts in the database
     await prisma.user.update({
       where: { id: buyerId },
-      data: { contacts: updatedBuyerContacts },
+      data: {
+        contacts: updatedBuyerContacts,
+        totalSpending: { increment: paymentInfo.response.total_amount }, // Increment spending
+      },
     });
-
+    
     await prisma.user.update({
       where: { id: sellerId },
-      data: { contacts: updatedSellerContacts },
+      data: {
+        contacts: updatedSellerContacts,
+        totalEarnings: { increment: paymentInfo.response.total_amount }, // Increment earning
+      },
     });
-
+    
     // Create a new payment record in the database
     const paymentData = await prisma.payment.create({
       data: {
