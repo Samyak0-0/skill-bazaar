@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { MessagingContext } from '@/provider/MessagingContext';
 
 
 type Props = {}
@@ -17,7 +18,9 @@ interface OrderData {
 }
 
 const Create_order = (props: Props) => {
+
   const { data: session } = useSession();
+  const {userId} = useContext(MessagingContext)
   const router = useRouter();
   const [formData, setFormData] = useState<OrderData>({
     workTitle: '',
@@ -27,7 +30,7 @@ const Create_order = (props: Props) => {
     // These will need to be set based on your authentication and service selection
     serviceId: '', 
     buyerId: '',  
-    sellerId: '',
+    sellerId: userId,
     status: 'PENDING' // Default status
   });
 
@@ -76,7 +79,7 @@ const Create_order = (props: Props) => {
           category: 'Education',
           serviceId: '',
           buyerId: '',
-          sellerId: '',
+          sellerId: userId,
           status: 'PENDING'
         });
         router.push('/orders');

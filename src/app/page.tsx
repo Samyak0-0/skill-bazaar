@@ -10,7 +10,7 @@ import { User } from 'lucide-react';
 export default function Home() {
   const [showCreateOrder, setShowCreateOrder] = useState(false);
   const {data} = useSession();
-  const {userId, setUserId} = useContext(MessagingContext)
+  const {setUserId} = useContext(MessagingContext)
 
   useEffect(() => {
     const fetchId = async () => {
@@ -26,12 +26,8 @@ export default function Home() {
       }
     };
     fetchId();
-  }, [data?.user?.email, setUserId]); // Depend on session email
-  
-  useEffect(() => {
-    console.log("Updated userId:", userId);
-  }, [userId]);
-   
+  }, [data?.user?.email, setUserId]);
+
   return (
     <div className="relative">
       {/* Navigation Button */}

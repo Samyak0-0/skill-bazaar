@@ -76,8 +76,6 @@ const OrderDetailPage = () => {
         buyerId: userId,
       };
 
-      console.log("asdasdas: ", userId)
-
       const response = await fetch("http://localhost:3000/api/esewa-payment", {
         method: "POST",
         body: JSON.stringify(requestData),
