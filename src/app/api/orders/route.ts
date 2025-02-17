@@ -1,25 +1,53 @@
 // app/api/orders/route.ts
 //for the home page stuff(created by sagar hai, this mine).
 // for notification aakriti has edited hai, this our .
+
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client'; 
+import { PrismaClient } from '@prisma/client';
+import { getServerSession } from "next-auth";
+import { authOptions } from '@/utilities/auth';
 
 const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
+    
+    const user = await prisma.user.findUnique({  
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
     const orders = await prisma.order.findMany({
-      where: category ? {
-        category: category
-      } : undefined,
+      where: {
+        ...(category ? { category } : {}),
+        NOT: {
+          sellerId: {
+            equals: user.id,
+          },
+        },
+      },
       orderBy: {
         createdAt: 'desc'
       }
     });
-
-
     
     return NextResponse.json(orders);
   } catch (error) {
