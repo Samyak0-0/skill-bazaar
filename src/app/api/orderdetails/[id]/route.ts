@@ -6,6 +6,47 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+//aakriti has added Patch method only dont cry 
+export async function PATCH(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await req.json();
+    const { status } = body;
+
+    const updatedOrder = await prisma.order.update({
+      where: {
+        id: params.id,
+      },
+      data: {
+        status: status,
+      },
+    });
+    if (updatedOrder.buyerId) {
+    // Create a notification for the buyer
+    await prisma.notification.create({
+      data: {
+        type: `Order ${status}`,
+        message: `Your order "${updatedOrder.workTitle}" has been ${status.toLowerCase()}`,
+        userId: updatedOrder.buyerId,
+        orderId: updatedOrder.id,
+        read: false
+      }
+    });
+  }
+    return NextResponse.json(updatedOrder);
+  } catch (error) {
+    console.error("Error updating order:", error);
+    return NextResponse.json(
+      { error: "Failed to update order" },
+      { status: 500 }
+    );
+  }
+}
+
+
+
 export async function GET(
   req: Request,
   context: { params: Promise<{ id: string }> }

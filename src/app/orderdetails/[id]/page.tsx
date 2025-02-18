@@ -68,15 +68,18 @@ const OrderDetailPage = () => {
 
     fetchOrderDetails();
   }, [params?.id]);
-
   const handleOrderAction = async (action: 'accept' | 'decline') => {
     if (!orderData || actionInProgress) return;
-
+  
     try {
       setActionInProgress(true);
       
+      // Log the request details
+      console.log('Sending request to:', `/api/orderdetails/${orderData.id}`);
+      console.log('Request body:', { status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' });
+      
       // Update order status
-      const orderResponse = await fetch(`/api/orders/${orderData.id}`, {
+      const orderResponse = await fetch(`/api/orderdetails/${orderData.id}`, {  // Changed from /api/orders to /api/orderdetails
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -85,11 +88,16 @@ const OrderDetailPage = () => {
           status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' 
         }),
       });
-
+  
+      // Log the response
+      console.log('Response status:', orderResponse.status);
+      const responseData = await orderResponse.json();
+      console.log('Response data:', responseData);
+  
       if (!orderResponse.ok) {
-        throw new Error(`Failed to ${action} order`);
+        throw new Error(`Failed to ${action} order: ${responseData.error || 'Unknown error'}`);
       }
-
+  
       // Create notification for buyer
       const notificationResponse = await fetch('/api/notifications', {
         method: 'POST',
@@ -104,24 +112,80 @@ const OrderDetailPage = () => {
           read: false
         }),
       });
-
+  
       if (!notificationResponse.ok) {
         throw new Error('Failed to create notification');
       }
-       // Update local state
-       setOrderData(prev => prev ? { ...prev, status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' } : null);
+  
+      // Update local state
+      setOrderData(prev => prev ? { ...prev, status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' } : null);
       
-       // Show success message and redirect after a brief delay
-       setTimeout(() => {
-         router.push('/notifications');
-       }, 1500);
+      // Show success message and redirect after a brief delay
+      setTimeout(() => {
+        router.push('/notifications');
+      }, 1500);
+  
+    } catch (err) {
+      console.error('Error in handleOrderAction:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
+  // const handleOrderAction = async (action: 'accept' | 'decline') => {
+  //   if (!orderData || actionInProgress) return;
+
+  //   try {
+  //     setActionInProgress(true);
+      
+  //     // Update order status
+  //     const orderResponse = await fetch(`/api/orders/${orderData.id}`, {
+  //       method: 'PATCH',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ 
+  //         status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' 
+  //       }),
+  //     });
+
+  //     if (!orderResponse.ok) {
+  //       throw new Error(`Failed to ${action} order`);
+  //     }
+
+  //     // Create notification for buyer
+  //     const notificationResponse = await fetch('/api/notifications', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         type: `Order ${action.toUpperCase()}ED`,
+  //         message: `Your order "${orderData.workTitle}" has been ${action}ed by the seller`,
+  //         userId: orderData.buyerId,
+  //         orderId: orderData.id,
+  //         read: false
+  //       }),
+  //     });
+
+  //     if (!notificationResponse.ok) {
+  //       throw new Error('Failed to create notification');
+  //     }
+  //      // Update local state
+  //      setOrderData(prev => prev ? { ...prev, status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' } : null);
+      
+  //      // Show success message and redirect after a brief delay
+  //      setTimeout(() => {
+  //        router.push('/notifications');
+  //      }, 1500);
  
-     } catch (err) {
-       setError(err instanceof Error ? err.message : 'An error occurred');
-     } finally {
-       setActionInProgress(false);
-     }
-   };
+  //    } catch (err) {
+  //      setError(err instanceof Error ? err.message : 'An error occurred');
+  //    } finally {
+  //      setActionInProgress(false);
+  //    }
+  //  };
 
 
   const handlePayment = async (
