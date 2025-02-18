@@ -37,44 +37,6 @@ export default function Messaging() {
     scrollToBottom();
   }, [messages]);
 
-  // useEffect(() => {
-  //   const storage = getStorage(app);
-  //   const upload = () => {
-  //     const name = new Date().getTime() + file.name;
-  //     const storageRef = ref(storage, name);
-
-  //     const uploadTask = uploadBytesResumable(storageRef, file);
-
-  //     uploadTask.on(
-  //       "state_changed",
-  //       (snapshot) => {
-  //         const progress =
-  //           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //         console.log("Upload is " + progress + "% done");
-  //         switch (snapshot.state) {
-  //           case "paused":
-  //             console.log("Upload is paused");
-  //             break;
-  //           case "running":
-  //             console.log("Upload is running");
-  //             break;
-  //         }
-  //       },
-  //       (error) => {},
-  //       () => {
-  //         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-  //           setMedia(downloadURL);
-  //         });
-  //       }
-  //     );
-  //   };
-  //   file && upload();
-  // }, [file]);
-
-  // useEffect(() => {
-  //   console.log(file)
-  // }, [file])
-
   const uploadFile = async () => {
     if (!file) return null;
 
@@ -144,48 +106,6 @@ export default function Messaging() {
     }
   };
 
-  // const sendMessage = async () => {
-  //   let message;
-  //   if (input.trim()) {
-  //     if (media) {
-  //       message = {
-  //         senderId: userId,
-  //         recipientId: selectedContact,
-  //         text: input,
-  //         timestamp: new Date(),
-  //         file: media,
-  //       };
-  //     } else {
-  //       message = {
-  //         senderId: userId,
-  //         recipientId: selectedContact,
-  //         text: input,
-  //         timestamp: new Date(),
-  //       };
-  //     }
-
-  //     try {
-  //       const response = await fetch("http://localhost:3000/api/messages", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(message),
-  //       });
-
-  //       if (response.ok) {
-  //         socket.emit("sendMessage", message);
-  //         setMessages((prevMessages) => [...prevMessages, message]);
-  //         setInput("");
-  //       } else {
-  //         console.error("Failed to send message:", response.status);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error sending message:", error);
-  //     }
-  //   }
-  // };
-
   useEffect(() => {
     socket.on("receiveMessage", (msg) => {
       setMessages((prev) => [...prev, msg]);
@@ -237,7 +157,12 @@ export default function Messaging() {
           <img
             src={URL}
             alt="attachment"
-            style={{ width: "50vw", maxWidth: "500px", marginTop: "10px", borderRadius:"10px" }}
+            style={{
+              width: "50vw",
+              maxWidth: "500px",
+              marginTop: "10px",
+              borderRadius: "10px",
+            }}
           />
         </a>
       );

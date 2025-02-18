@@ -21,7 +21,7 @@ export default function Orders() {
             onMouseEnter={() => setHoveredTab(tab as "sold" | "bought")}
             onMouseLeave={() => setHoveredTab(null)}
           >
-            {tab === "sold" ? "Sold by" : "Bought by"}
+            {tab === "sold" ? "Sold" : "Bought"}
           </button>
         ))}
       </div>

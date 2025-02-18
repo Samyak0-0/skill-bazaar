@@ -14,6 +14,7 @@ export async function GET(req) {
     // Find the purchased item using the transaction UUID
     const purchasedItemData = await prisma.purchasedOrder.findUnique({
       where: { id: paymentInfo.response.transaction_uuid },
+      include: { order: true },
     });
 
     if (!purchasedItemData) {
@@ -23,6 +24,44 @@ export async function GET(req) {
       });
     }
 
+    const { buyerId } = purchasedItemData;
+    const { sellerId } = purchasedItemData.order;
+
+    // Fetch existing contacts
+    const buyer = await prisma.user.findUnique({
+      where: { id: buyerId },
+      select: { contacts: true },
+    });
+
+    const seller = await prisma.user.findUnique({
+      where: { id: sellerId },
+      select: { contacts: true },
+    });
+
+    // Merge contacts while ensuring uniqueness
+    const updatedBuyerContacts = Array.from(
+      new Set([...(buyer?.contacts || []), sellerId])
+    );
+    const updatedSellerContacts = Array.from(
+      new Set([...(seller?.contacts || []), buyerId])
+    );
+
+    await prisma.user.update({
+      where: { id: buyerId },
+      data: {
+        contacts: updatedBuyerContacts,
+        totalSpending: { increment: paymentInfo.response.total_amount }, // Increment spending
+      },
+    });
+    
+    await prisma.user.update({
+      where: { id: sellerId },
+      data: {
+        contacts: updatedSellerContacts,
+        totalEarnings: { increment: paymentInfo.response.total_amount }, // Increment earning
+      },
+    });
+    
     // Create a new payment record in the database
     const paymentData = await prisma.payment.create({
       data: {
@@ -61,7 +100,7 @@ export async function POST(req, res) {
   //initialize eswea payment
   try {
     const body = await req.json();
-    const { itemId, totalPrice } = body;
+    const { itemId, totalPrice, buyerId } = body;
 
     const itemData = await prisma.order.findUnique({
       where: { id: itemId },
@@ -77,6 +116,7 @@ export async function POST(req, res) {
       data: {
         orderId: itemId,
         status: "PENDING",
+        buyerId: buyerId,
         purchaseDate: new Date(),
       },
     });

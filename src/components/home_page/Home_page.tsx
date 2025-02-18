@@ -15,6 +15,7 @@ interface OrderData {
   buyerId: string;
   sellerId: string;
   status: string;
+  userId: string;
 }
 
 const Home_page = () => {
