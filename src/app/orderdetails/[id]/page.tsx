@@ -9,6 +9,9 @@ interface OrderData {
   description: string;
   rate: string;
   category: string;
+  status: string; //track order status
+  sellerId: string;
+  buyerId: string;
 }
 
 interface Comment {
@@ -26,11 +29,12 @@ interface OrderData {
 
 const OrderDetailPage = () => {
   const router = useRouter();
-  const params = useParams(); // ✅ Correct: No need to unwrap
+  const params = useParams(); 
 
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionInProgress, setActionInProgress] = useState(false);
 
   const comments: Comment[] = [
     {
@@ -50,7 +54,7 @@ const OrderDetailPage = () => {
   ];
 
   useEffect(() => {
-    if (!params?.id) return; // ✅ Ensure params.id exists
+    if (!params?.id) return; 
 
     const fetchOrderDetails = async () => {
       try {
@@ -69,6 +73,61 @@ const OrderDetailPage = () => {
 
     fetchOrderDetails();
   }, [params?.id]);
+
+  const handleOrderAction = async (action: 'accept' | 'decline') => {
+    if (!orderData || actionInProgress) return;
+
+    try {
+      setActionInProgress(true);
+      
+      // Update order status
+      const orderResponse = await fetch(`/api/orders/${orderData.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' 
+        }),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error(`Failed to ${action} order`);
+      }
+
+      // Create notification for buyer
+      const notificationResponse = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: `Order ${action.toUpperCase()}ED`,
+          message: `Your order "${orderData.workTitle}" has been ${action}ed by the seller`,
+          userId: orderData.buyerId,
+          orderId: orderData.id,
+          read: false
+        }),
+      });
+
+      if (!notificationResponse.ok) {
+        throw new Error('Failed to create notification');
+      }
+       // Update local state
+       setOrderData(prev => prev ? { ...prev, status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' } : null);
+      
+       // Show success message and redirect after a brief delay
+       setTimeout(() => {
+         router.push('/notifications');
+       }, 1500);
+ 
+     } catch (err) {
+       setError(err instanceof Error ? err.message : 'An error occurred');
+     } finally {
+       setActionInProgress(false);
+     }
+   };
+
 
   const handlePayment = async (
     rate: string,
@@ -132,8 +191,14 @@ const OrderDetailPage = () => {
     } catch (error) {
       console.error("Error during payment processing:", error);
     }
+ 
+ 
+
+
   };
 
+
+  
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto p-6 flex justify-center items-center">
@@ -173,8 +238,38 @@ const OrderDetailPage = () => {
               {orderData.rate}
             </div>
             <div className="text-gray-600">Category: {orderData.category}</div>
+            <div className="text-gray-600 mt-2">
+              Status: <span className="font-semibold">{orderData.status}</span>
+            </div>
           </div>
         </div>
+
+        {orderData.status === 'PENDING' && (
+          <div className="border-t border-gray-200 pt-6 flex gap-4 mb-6">
+            <button
+              onClick={() => handleOrderAction('accept')}
+              disabled={actionInProgress}
+              className={`flex-1 py-3 px-4 rounded-lg text-white text-center font-medium
+                ${actionInProgress 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-green-500 hover:bg-green-600 transition'
+                }`}
+            >
+              {actionInProgress ? 'Processing...' : 'Accept Order'}
+            </button>
+            <button
+              onClick={() => handleOrderAction('decline')}
+              disabled={actionInProgress}
+              className={`flex-1 py-3 px-4 rounded-lg text-white text-center font-medium
+                ${actionInProgress 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-red-500 hover:bg-red-600 transition'
+                }`}
+            >
+              {actionInProgress ? 'Processing...' : 'Decline Order'}
+            </button>
+          </div>
+        )}
 
         <div className="border-t border-gray-200 pt-6 flex justify-between">
           <div className="flex items-center gap-2 mb-4">

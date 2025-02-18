@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRouter } from 'next/navigation';//for orderdetails page nav
 
 interface NotificationData {
   id: string;
@@ -14,12 +15,24 @@ interface NotificationData {
   orderId?: string;
 }
 
+interface OrderData {
+  id: string;
+  workTitle: string;
+  description: string;
+  rate: string;
+  category: string;
+  serviceId: string;
+  buyerId: string;
+  sellerId: string;
+  status: string;
+}
+
 function Notification() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Fetch notifications
   const fetchNotifications = async () => {
     try {
       const response = await fetch('/api/notifications');
@@ -39,17 +52,21 @@ function Notification() {
     }
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchNotifications();
-
-    // Set up polling for new notifications
-    const intervalId = setInterval(fetchNotifications, 30000); // Check every 30 seconds
-
-    // Cleanup interval on component unmount
+    const intervalId = setInterval(fetchNotifications, 30000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, []); 
 
+  const handleNotificationClick = async (notification: NotificationData) => {
+    // Mark as read
+    await markAsRead(notification.id);
+  
+    // Navigate to order details if it's a new order notification
+    if (notification.type === 'New Order' && notification.orderId) {
+      router.push(`/orderdetails/${notification.orderId}`);
+    }
+  };
   const markAsRead = async (id: string) => {
     try {
       const response = await fetch(`/api/notifications/${id}`, {
@@ -92,6 +109,7 @@ function Notification() {
       </div>
     );
   }
+ 
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -104,7 +122,7 @@ function Notification() {
               key={notification.id}
               className={`bg-[#E5F0F3] rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md
                 ${notification.read ? 'bg-gray-100' : ''}`}
-              onClick={() => !notification.read && markAsRead(notification.id)}
+              onClick={() => handleNotificationClick(notification)}
             >
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-1">
