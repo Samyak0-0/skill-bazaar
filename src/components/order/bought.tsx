@@ -89,7 +89,7 @@ export default function Bought() {
           {orders.map((order) => (
             <OrderCard
               key={order.id}
-              username={order.buyer?.name || 'Unknown User'} // Changed to buyer for bought orders
+              username={order.seller?.name || 'Unknown User'} // Changed to buyer for bought orders
               skill={order.service?.name || 'Unknown Service'}
               work={order.workTitle || 'Untitled Work'}
               status={order.status}
