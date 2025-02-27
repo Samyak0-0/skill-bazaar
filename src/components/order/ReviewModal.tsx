@@ -7,6 +7,7 @@ interface ReviewModalProps {
   onClose: () => void;
   reviews: Review[];
   orderId: string;
+  type: string; // Type parameter for API endpoint
   onReviewAdded?: (review: Review) => void;
 }
 
@@ -15,9 +16,10 @@ export default function ReviewModal({
   onClose, 
   reviews, 
   orderId,
+  type, // Include type in destructuring
   onReviewAdded 
 }: ReviewModalProps) {
-  const { data: session, status } = useSession();  // Add status from useSession
+  const { data: session, status } = useSession();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +46,8 @@ export default function ReviewModal({
     setError(null);
 
     try {
-      const response = await fetch(`/api/orders/bought/${orderId}/reviews`, {
+      // Use the type parameter in the API endpoint
+      const response = await fetch(`/api/orders/${type}/${orderId}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +92,7 @@ export default function ReviewModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Reviews for Order</h2>
+          <h2 className="text-xl font-bold">Reviews</h2>
           <button 
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -144,7 +147,7 @@ export default function ReviewModal({
           </div>
         )}
 
-        {/* Rest of the reviews display code remains the same */}
+        {/* Reviews display */}
         {!reviews || reviews.length === 0 ? (
           <p className="text-gray-500 text-center py-4">No reviews yet</p>
         ) : (

@@ -37,7 +37,7 @@ export interface OrderCardProps {
   date: string;
   reviews: number;
   orderId: string;
-  serviceId: string;
+  type?: 'bought' | 'sold'; // Added type as optional parameter with specific types
 }
 
 export interface Review {

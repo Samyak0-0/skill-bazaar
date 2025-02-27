@@ -1,4 +1,4 @@
-// app/orders/bought.tsx 
+// app/orders/bought.tsx
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import OrderCard from "./ordercard";
@@ -89,13 +89,14 @@ export default function Bought() {
           {orders.map((order) => (
             <OrderCard
               key={order.id}
-              username={order.seller?.name || 'Unknown User'}
+              username={order.buyer?.name || 'Unknown User'} // Changed to buyer for bought orders
               skill={order.service?.name || 'Unknown Service'}
               work={order.workTitle || 'Untitled Work'}
               status={order.status}
               date={new Date(order.createdAt).toLocaleDateString()}
               reviews={order.Review?.length || 0}
               orderId={order.id}
+              type="bought" // Explicitly setting type as "bought"
             />
           ))}
         </div>

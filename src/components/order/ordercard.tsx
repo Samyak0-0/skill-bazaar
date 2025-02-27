@@ -22,7 +22,8 @@ export default function OrderCard({
   status, 
   date, 
   reviews: initialReviewCount, 
-  orderId 
+  orderId,
+  type = 'bought' // Default type parameter (either 'bought' or 'sold')
 }: OrderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
@@ -37,7 +38,8 @@ export default function OrderCard({
     setError(null);
 
     try {
-      const response = await fetch(`/api/orders/{type}/${orderId}/reviews`);
+      // Use the type parameter in the API call
+      const response = await fetch(`/api/orders/${type}/${orderId}/reviews`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -100,9 +102,9 @@ export default function OrderCard({
               }`}
               onClick={handleViewReviews}
               disabled={loading}
-              aria-label="View reviews"
+              aria-label="Reviews"
             >
-              {loading ? 'Loading...' : 'View Reviews'}
+              {loading ? 'Loading...' : 'Reviews'}
             </button>
           </div>
           {error && (
@@ -118,6 +120,7 @@ export default function OrderCard({
         onClose={handleCloseModal}
         reviews={reviewsData}
         orderId={orderId}
+        type={type} // Pass the type prop to ReviewModal
         onReviewAdded={handleReviewAdded}
       />
     </>
