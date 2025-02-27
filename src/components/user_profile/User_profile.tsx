@@ -38,7 +38,6 @@ const UserProfile = () => {
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const { data } = useSession();
-  const { userId, setUserId } = useContext(MessagingContext);
 
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -368,7 +367,7 @@ const UserProfile = () => {
           </p>
         </div>
         <div className="p-4 bg-green-50 rounded-lg">
-          <p className="text-sm text-gray-600">Completed Jobs</p>
+          <p className="text-sm text-gray-600">Orders Received</p>
           <p className="text-2xl font-semibold text-green-600">
             {userData.finances.completedJobs}
           </p>

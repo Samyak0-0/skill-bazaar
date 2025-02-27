@@ -303,7 +303,7 @@ const OrderDetailPage = () => {
           </div>
         </div>
 
-        {orderData.status === 'PENDING' && (
+        {/* {orderData.status === 'PENDING' && (
           <div className="border-t border-gray-200 pt-6 flex gap-4 mb-6">
             <button
               onClick={() => handleOrderAction('accept')}
@@ -328,7 +328,7 @@ const OrderDetailPage = () => {
               {actionInProgress ? 'Processing...' : 'Decline Order'}
             </button>
           </div>
-        )}
+        )} */}
 
         <div className="border-t border-gray-200 pt-6 flex justify-between">
           <div className="flex items-center gap-2 mb-4">
