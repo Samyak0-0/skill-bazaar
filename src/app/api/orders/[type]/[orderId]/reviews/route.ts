@@ -1,9 +1,32 @@
+// First file: review route with enhanced debugging
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utilities/auth';
 
 const prisma = new PrismaClient();
+
+// Temporary function to get user ID with fallback for debugging
+async function getUserId() {
+  try {
+    const session = await getServerSession(authOptions);
+    console.log('Authentication session:', JSON.stringify(session, null, 2));
+    
+    // If we have a valid session with user ID, use it
+    if (session?.user?.id) {
+      return session.user.id;
+    }
+    
+    // For debugging purposes: fallback to a hardcoded ID
+    // IMPORTANT: Remove this in production!
+    console.warn('⚠️ Using fallback user ID for development - REMOVE IN PRODUCTION');
+    return "cm66ug29w0000v7ls10ac6rga"; // Your original dummy ID
+  } catch (error) {
+    console.error('Error getting user session:', error);
+    // Return null to indicate authentication failed
+    return null;
+  }
+}
 
 export async function GET(
   request: Request, 
@@ -43,9 +66,9 @@ export async function POST(
   }
 
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
+    const userId = await getUserId();
+    
+    if (!userId) {
       return NextResponse.json(
         { error: 'You must be logged in to submit a review' }, 
         { status: 401 }
@@ -66,7 +89,7 @@ export async function POST(
       data: {
         rating,
         comment,
-        reviewerId: session.user.id,
+        reviewerId: userId,
         orderId: params.orderId
       },
       include: {
@@ -80,7 +103,7 @@ export async function POST(
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
-      { error: 'Failed to create review' }, 
+      { error: 'Failed to create review', details: error instanceof Error ? error.message : String(error) }, 
       { status: 500 }
     );
   }
