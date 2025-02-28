@@ -6,7 +6,7 @@ import { authOptions } from '@/utilities/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary function to get user ID with fallback for debugging
+// Get authenticated user ID more reliably
 async function getUserId() {
   try {
     const session = await getServerSession(authOptions);
@@ -17,14 +17,14 @@ async function getUserId() {
       return session.user.id;
     }
     
-    // For debugging purposes: fallback to a hardcoded ID
-    // IMPORTANT: Remove this in production!
-    console.warn('⚠️ Using fallback user ID for development - REMOVE IN PRODUCTION');
-    return "cm66ug29w0000v7ls10ac6rga"; // Your original dummy ID
+    // Development fallback with clear warning
+    console.warn('⚠️ No valid user session found - using fallback ID for development only');
+    return process.env.NODE_ENV === 'production' 
+      ? null 
+      : "cm67b0urn0000v7uky5xp4a7s";
   } catch (error) {
     console.error('Error getting user session:', error);
-    // For debugging only, return the dummy ID even on error
-    return "cm66ug29w0000v7ls10ac6rga";
+    return process.env.NODE_ENV === 'production' ? null : "cm67b0urn0000v7uky5xp4a7s";
   }
 }
 
@@ -33,11 +33,16 @@ export async function GET(
   { params }: { params: { type: string } }
 ) {
   try {
-    // Get user ID with fallback for debugging
+    // Get user ID with improved error handling
     const userId = await getUserId();
     
-    // No authentication check for now (for debugging)
-    // We'll use the fallback ID if authentication fails
+    // If no userId and in production, return authentication error
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
     
     const type = params.type;
     const { searchParams } = new URL(request.url);

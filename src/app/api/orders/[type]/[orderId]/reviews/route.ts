@@ -1,4 +1,4 @@
-// First file: review route with enhanced debugging
+// app/api/orders/[type]/[orderId]/review/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
@@ -6,25 +6,25 @@ import { authOptions } from '@/utilities/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary function to get user ID with fallback for debugging
+// Get authenticated user ID more reliably - consistent with orders route
 async function getUserId() {
   try {
     const session = await getServerSession(authOptions);
-    console.log('Authentication session:', JSON.stringify(session, null, 2));
+    console.log('Authentication session in review route:', JSON.stringify(session, null, 2));
     
     // If we have a valid session with user ID, use it
     if (session?.user?.id) {
       return session.user.id;
     }
     
-    // For debugging purposes: fallback to a hardcoded ID
-    // IMPORTANT: Remove this in production!
-    console.warn('⚠️ Using fallback user ID for development - REMOVE IN PRODUCTION');
-    return "cm66ug29w0000v7ls10ac6rga"; // Your original dummy ID
+    // Development fallback with clear warning
+    console.warn('⚠️ No valid user session found - using fallback ID for development only');
+    return process.env.NODE_ENV === 'production' 
+      ? null 
+      : "cm67b0urn0000v7uky5xp4a7s";
   } catch (error) {
     console.error('Error getting user session:', error);
-    // Return null to indicate authentication failed
-    return null;
+    return process.env.NODE_ENV === 'production' ? null : "cm67b0urn0000v7uky5xp4a7s";
   }
 }
 
