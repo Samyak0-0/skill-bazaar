@@ -199,3 +199,6 @@ enum FinancialType {
   SPENDINGs
   EARNINGS
 }
+
+//also remember to npx prisma generate after updating here and manny fieds in orders and stuff are optioinal because
+//they are not inputted at the time of creation, and they cant be requested and many loopholes AHHHHHHHHHHH.
