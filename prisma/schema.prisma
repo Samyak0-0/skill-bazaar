@@ -54,8 +54,8 @@ model User {
   location      String?
   contacts      String[]
 
-  totalSpending  Float     @default(0.0)
-  totalEarnings  Float     @default(0.0)
+  totalSpending Float @default(0.0)
+  totalEarnings Float @default(0.0)
 
   services      Service[]      @relation("UserServices")
   buyerOrders   Order[]        @relation("BuyerOrders")
@@ -101,7 +101,7 @@ model Review {
 
 model Order {
   id          String   @id @default(cuid()) @map("_id")
-  serviceId   String
+  serviceId   String?
   workTitle   String?
   description String?
   rate        String?
@@ -184,17 +184,16 @@ model Notification {
 }
 
 model FinancialStatement {
-  id          String   @id @default(cuid()) @map("_id")
+  id          String        @id @default(cuid()) @map("_id")
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  date        DateTime @default(now())
+  user        User          @relation(fields: [userId], references: [id])
+  date        DateTime      @default(now())
   description String
   amount      Float
   type        FinancialType
 
   @@index([userId, date])
 }
-
 
 enum FinancialType {
   SPENDINGs
