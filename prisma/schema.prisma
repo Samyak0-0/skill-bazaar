@@ -101,7 +101,7 @@ model Review {
 
 model Order {
   id          String   @id @default(cuid()) @map("_id")
-  serviceId   String
+  serviceId   String?
   workTitle   String?
   description String?
   rate        String?

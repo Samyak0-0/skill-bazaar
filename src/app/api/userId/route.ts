@@ -1,3 +1,4 @@
+//src/app/api/userId/route.ts
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/utilities/prisma";
