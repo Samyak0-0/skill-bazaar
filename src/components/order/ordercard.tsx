@@ -31,14 +31,66 @@ export default function OrderCard({
   const [reviewCount, setReviewCount] = useState(initialReviewCount);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const statusColor = getStatusColor(status);
+  const [currentStatus, setCurrentStatus] = useState(status);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const statusColor = getStatusColor(currentStatus);
+  
+  // Determine if status can be changed (only for sellers and when not already completed)
+  const canChangeStatus = type === 'sold' && currentStatus.toUpperCase() !== 'COMPLETED';
+  
+  // Get the next status based on current status
+  const getNextStatus = (currentStatus: string): string => {
+    switch (currentStatus.toUpperCase()) {
+      case 'PENDING':
+        return 'IN PROGRESS';
+      case 'IN PROGRESS':
+        return 'COMPLETED';
+      default:
+        return currentStatus;
+    }
+  };
+  
+  const handleStatusChange = async () => {
+    if (!canChangeStatus) return;
+    
+    const nextStatus = getNextStatus(currentStatus);
+    if (nextStatus === currentStatus) return;
+    
+    setIsUpdatingStatus(true);
+    setError(null);
+    
+    try {
+      // CORRECTED: Remove 'sold/' from the URL path to match the API route structure
+      const response = await fetch(`/api/orders/sold/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update status');
+      }
+      
+      const updatedOrder = await response.json();
+      setCurrentStatus(updatedOrder.status);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update status');
+      console.error('Error updating status:', err);
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   const handleViewReviews = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Use the type parameter in the API call
+      // Keep this URL as is since it's a different API endpoint
       const response = await fetch(`/api/orders/${type}/${orderId}/reviews`);
       
       if (!response.ok) {
@@ -88,11 +140,26 @@ export default function OrderCard({
           </div>
         </div>
         <div className="text-right">
-          <span 
-            className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}
-          >
-            {status}
-          </span>
+          <div className="flex flex-col items-end justify-center">
+            <span 
+              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}
+            >
+              {currentStatus}
+            </span>
+            
+            {canChangeStatus && (
+              <button
+                onClick={handleStatusChange}
+                disabled={isUpdatingStatus}
+                className={`mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors ${
+                  isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isUpdatingStatus ? 'Updating...' : `Mark as ${getNextStatus(currentStatus)}`}
+              </button>
+            )}
+          </div>
+          
           <p className="mt-2 text-black">Date: {date}</p>
           <div className="flex items-center justify-end gap-2 mt-2">
             <span className="text-black">{reviewCount} reviews</span>
@@ -120,7 +187,7 @@ export default function OrderCard({
         onClose={handleCloseModal}
         reviews={reviewsData}
         orderId={orderId}
-        type={type} // Pass the type prop to ReviewModal
+        type={type}
         onReviewAdded={handleReviewAdded}
       />
     </>
