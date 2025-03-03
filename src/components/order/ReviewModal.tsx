@@ -88,6 +88,9 @@ export default function ReviewModal({
     );
   }
 
+  // Determine if the user can submit a review (only buyers can submit reviews)
+  const canSubmitReview = type === 'bought' && status === "authenticated" && session?.user;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
@@ -101,7 +104,8 @@ export default function ReviewModal({
           </button>
         </div>
 
-        {status === "authenticated" && session?.user ? (
+        {/* Show review form only for buyers (bought tab) */}
+        {canSubmitReview ? (
           <form onSubmit={handleSubmitReview} className="mb-6 border-b pb-6">
             <div className="mb-4">
               <label className="block text-gray-700 mb-2">Rating</label>
@@ -141,7 +145,13 @@ export default function ReviewModal({
               {isSubmitting ? 'Submitting...' : 'Submit Review'}
             </button>
           </form>
+        ) : type === 'sold' ? (
+          // For sellers (sold tab), show a message that they can only view reviews
+          <div className="mb-6 border-b pb-6 text-center text-gray-500">
+            As a seller, you can view reviews but cannot submit them
+          </div>
         ) : (
+          // For unauthenticated users
           <div className="mb-6 border-b pb-6 text-center text-red-500">
             You must be logged in to submit a review
           </div>

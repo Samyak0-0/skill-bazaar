@@ -120,6 +120,9 @@ export default function OrderCard({
     setError(null);
   };
 
+  // Set button text based on user type
+  const reviewButtonText = type === 'bought' ? 'Review & View' : 'View Reviews';
+
   return (
     <>
       <div
@@ -171,7 +174,7 @@ export default function OrderCard({
               disabled={loading}
               aria-label="Reviews"
             >
-              {loading ? 'Loading...' : 'Reviews'}
+              {loading ? 'Loading...' : reviewButtonText}
             </button>
           </div>
           {error && (
