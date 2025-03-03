@@ -126,7 +126,7 @@ export default function OrderCard({
   return (
     <>
       <div
-        className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden p-5
+        className={`bg-teal-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden p-5
           ${isHovered ? 'transform scale-[1.01]' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

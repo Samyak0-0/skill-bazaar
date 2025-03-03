@@ -8,6 +8,7 @@ export default function Orders() {
   const [activeTab, setActiveTab] = useState<"sold" | "bought">("sold");
   const [hoveredTab, setHoveredTab] = useState<"sold" | "bought" | null>(null);
 
+  
   return (
     <div className="w-full h-screen flex flex-col bg-gray-50 font-sans">
     
@@ -19,7 +20,7 @@ export default function Orders() {
               <button
                 key={tab}
                 className={`flex-1 py-4 font-medium text-center transition-colors
-                  ${activeTab === tab ? 'bg-teal-50 text-teal-600' : 'text-gray-600 hover:bg-gray-100'}`}
+                  ${activeTab === tab ? 'bg-teal-100 text-teal-600' : 'text-gray-600 hover:bg-gray-100'}`}
                 onClick={() => setActiveTab(tab as "sold" | "bought")}
                 onMouseEnter={() => setHoveredTab(tab as "sold" | "bought")}
                 onMouseLeave={() => setHoveredTab(null)}
