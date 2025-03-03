@@ -10,6 +10,7 @@ export default function Sold() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -22,18 +23,50 @@ export default function Sold() {
       }
 
       try {
+        // Log session info for debugging
+        console.log('Session info:', {
+          hasSession: !!session,
+          user: session?.user,
+          userId: session?.user?.id,
+        });
+
         const queryParams = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
+        console.log(`Fetching orders from: /api/orders/sold${queryParams}`);
+        
         const response = await fetch(`/api/orders/sold${queryParams}`, {
           credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',  // Prevent caching issues
+          }
         });
         
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to fetch orders');
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Error response:', errorData);
+          throw new Error(errorData.error || `Failed to fetch orders: ${response.status}`);
         }
 
         const data = await response.json();
-        setOrders(data);
+        console.log('Raw sold orders from API:', data);
+        
+        // Store raw data for debugging purposes
+        setDebugInfo({
+          rawCount: data.length,
+          sessionUserId: session?.user?.id,
+          rawData: data.length > 0 ? data[0] : null
+        });
+        
+        // Make sure we only show orders where we are the seller and there's a buyer
+        const validOrders = data.filter((order: Order) => 
+         order.buyerId && 
+         order.buyer
+        );
+        
+        if (validOrders.length < data.length) {
+          console.warn(`Filtered out ${data.length - validOrders.length} invalid sold orders`);
+        }
+        
+        setOrders(validOrders);
         setError(null);
       } catch (err) {
         console.error('Fetch error:', err);
@@ -44,7 +77,7 @@ export default function Sold() {
     };
 
     fetchOrders();
-  }, [sessionStatus, statusFilter]);
+  }, [sessionStatus, statusFilter, session?.user?.id]);
 
   const statuses = ['all', 'PENDING', 'IN PROGRESS', 'COMPLETED'];
 
@@ -80,16 +113,32 @@ export default function Sold() {
 
       {!loading && !error && orders.length === 0 && (
         <div className="text-gray-500 text-center p-4">
-          No orders found
+          <p>No orders found</p>
+          {process.env.NODE_ENV !== 'production' && debugInfo && (
+            <div className="mt-2 p-2 border border-dashed border-gray-300 text-xs text-left">
+              <p>Debug Info:</p>
+              <p>- User ID: {debugInfo.sessionUserId || 'Not found'}</p>
+              <p>- Raw orders count: {debugInfo.rawCount}</p>
+              <p>- API returned data: {debugInfo.rawCount > 0 ? 'Yes' : 'No'}</p>
+              {debugInfo.rawData && (
+                <details>
+                  <summary className="cursor-pointer">Show first order data</summary>
+                  <pre className="mt-2 overflow-auto max-h-40 bg-gray-100 p-2">
+                    {JSON.stringify(debugInfo.rawData, null, 2)}
+                  </pre>
+                </details>
+              )}
+            </div>
+          )}
         </div>
       )}
 
       {!loading && !error && orders.length > 0 && (
         <div className="space-y-4 text-black">
-          {orders.map((order) => (
+          {orders.map((order: Order) => (
             <OrderCard
               key={order.id}
-              username={order.seller?.name || 'Unknown User'} // Changed to seller for sold orders
+              username={order.buyer?.name || 'Unknown Buyer'} // Make sure we display the buyer's name
               category={order.category || 'Unknown Category'}
               work={order.workTitle || 'Untitled Work'}
               status={order.status}

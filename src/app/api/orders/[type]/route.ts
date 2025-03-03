@@ -1,6 +1,5 @@
 // app/api/orders/[type]/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utilities/auth';
 import { prisma } from '@/utilities/prisma';
@@ -41,14 +40,14 @@ async function getUserId() {
     // Development fallback with clear warning
     if (process.env.NODE_ENV !== 'production') {
       console.warn('⚠️ No valid user session found - using fallback ID for development only');
-      return "";
+      return "cm67fh38a0000u8tk5v2ii6vt";
     }
     
     console.error('No user session found and running in production - authentication failed');
     return null;
   } catch (error) {
     console.error('Error getting user session:', error);
-    return process.env.NODE_ENV === 'production' ? null : "";
+    return process.env.NODE_ENV === 'production' ? null : "cm67fh38a0000u8tk5v2ii6vt";
   }
 }
 
@@ -80,6 +79,7 @@ export async function GET(request: Request) {
     
     // Get order type from URL to avoid the params issue
     const orderType = getOrderTypeFromUrl(request.url);
+    console.log(`Order type: ${orderType}, User ID: ${userId}`);
     
     if (!orderType || (orderType !== 'sold' && orderType !== 'bought')) {
       return NextResponse.json(
@@ -90,24 +90,54 @@ export async function GET(request: Request) {
     
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
+    console.log(`Status filter: ${status || 'none'}`);
 
-    const orders = await prisma.order.findMany({
+    // Build the where condition based on order type
+    let whereCondition: any = {};
+    
+    // This ensures we're looking at the right type of orders (sold by me or bought by me)
+    if (orderType === 'sold') {
+      whereCondition.sellerId = userId;
+      // For sold orders, we want to ensure there's a buyer
+      whereCondition.buyerId = { not: null };
+    } else {
+      whereCondition.buyerId = userId;
+      // For bought orders, we want to ensure there's a seller
+      whereCondition.sellerId = { not: null };
+    }
+    
+    // Add status filter if provided
+    if (status && status !== 'all') {
+      whereCondition.status = status;
+    }
+    
+    console.log('Database query condition:', JSON.stringify(whereCondition, null, 2));
+    
+    // First, check if any orders exist with this seller/buyer ID
+    const totalOrdersCount = await prisma.order.count({
       where: {
         [orderType === 'sold' ? 'sellerId' : 'buyerId']: userId,
-        ...(status && status !== 'all' ? { status } : {})
-      },
+      }
+    });
+    
+    console.log(`Total ${orderType} orders for user ${userId} (without filters): ${totalOrdersCount}`);
+    
+    // Now perform the actual query with all filters
+    const orders = await prisma.order.findMany({
+      where: whereCondition,
       include: {
-        service: true,
         buyer: {
           select: {
             id: true,
             name: true,
+            email: true, // Include email for better debugging
           },
         },
         seller: {
           select: {
             id: true,
             name: true,
+            email: true, // Include email for better debugging
           },
         },
         Review: true,
@@ -116,6 +146,18 @@ export async function GET(request: Request) {
         createdAt: 'desc'
       }
     });
+
+    // Log the count and first item for debugging
+    console.log(`Fetched ${orders.length} ${orderType} orders for user ${userId}`);
+    if (orders.length > 0) {
+      console.log('First order sample:', JSON.stringify({
+        id: orders[0].id,
+        buyerId: orders[0].buyerId,
+        sellerId: orders[0].sellerId,
+        buyerName: orders[0].buyer?.name,
+        sellerName: orders[0].seller?.name,
+      }, null, 2));
+    }
 
     return NextResponse.json(orders);
   } catch (error) {
