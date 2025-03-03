@@ -83,39 +83,42 @@ export default function Sold() {
 
   return (
     <div>
-      <div className="mb-4 flex justify-center space-x-2">
+      <div className="flex justify-center mb-6 space-x-2">
         {statuses.map((s) => (
           <button
             key={s}
-            className={`px-4 py-2 rounded transition-colors ${
+            className={`px-4 py-2 rounded-full transition-colors ${
               statusFilter === s
-                ? 'bg-blue-500 text-black'
-                : 'bg-gray-200 text-black hover:bg-black hover:text-white'
+                ? 'bg-teal-500 text-white font-medium'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
             onClick={() => setStatusFilter(s)}
           >
-            {s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()}
+            {s === "all" ? "All" : s.charAt(0) + s.slice(1).toLowerCase()}
           </button>
         ))}
       </div>
 
       {loading && (
         <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-300" />
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500" />
         </div>
       )}
 
       {error && (
-        <div className="text-red-500 text-center p-4">
+        <div className="text-red-500 text-center p-4 rounded-lg bg-red-50 border border-red-100">
           {error}
         </div>
       )}
 
       {!loading && !error && orders.length === 0 && (
-        <div className="text-gray-500 text-center p-4">
-          <p>No orders found</p>
-          {process.env.NODE_ENV !== 'production' && debugInfo && (
-            <div className="mt-2 p-2 border border-dashed border-gray-300 text-xs text-left">
+        <div className="text-center py-12">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto w-16 h-16 text-gray-300 mb-4">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p className="text-gray-500">No orders found</p>
+          {/* {process.env.NODE_ENV !== 'production' && debugInfo && (
+            <div className="mt-2 p-2 border border-dashed border-gray-300 text-xs text-left max-w-md mx-auto bg-gray-50 rounded">
               <p>Debug Info:</p>
               <p>- User ID: {debugInfo.sessionUserId || 'Not found'}</p>
               <p>- Raw orders count: {debugInfo.rawCount}</p>
@@ -123,18 +126,18 @@ export default function Sold() {
               {debugInfo.rawData && (
                 <details>
                   <summary className="cursor-pointer">Show first order data</summary>
-                  <pre className="mt-2 overflow-auto max-h-40 bg-gray-100 p-2">
+                  <pre className="mt-2 overflow-auto max-h-40 bg-gray-100 p-2 rounded">
                     {JSON.stringify(debugInfo.rawData, null, 2)}
                   </pre>
                 </details>
-              )}
+              )} 
             </div>
-          )}
+          )} */}
         </div>
       )}
 
       {!loading && !error && orders.length > 0 && (
-        <div className="space-y-4 text-black">
+        <div className="space-y-4">
           {orders.map((order: Order) => (
             <OrderCard
               key={order.id}

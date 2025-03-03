@@ -5,11 +5,11 @@ import ReviewModal from "./ReviewModal";
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
     case 'COMPLETED':
-      return 'bg-green-100 text-green-800';
+      return 'bg-teal-100 text-teal-800';
     case 'IN PROGRESS':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-cyan-100 text-cyan-800';
     case 'PENDING':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-amber-100 text-amber-800';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -126,62 +126,67 @@ export default function OrderCard({
   return (
     <>
       <div
-        className={`flex justify-between bg-gray-100 p-4 my-2 rounded-lg shadow-md transition-transform duration-300 ${
-          isHovered ? 'transform scale-[1.015] shadow-lg' : ''
-        }`}
+        className={`bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden p-5
+          ${isHovered ? 'transform scale-[1.01]' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="flex gap-4">
-          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-            👤
-          </div>
-          <div>
-            <p><strong>Username</strong>: {username}</p>
-            <p><strong>Category</strong>: {category}</p>
-            <p><strong>Work</strong>: {work}</p>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="flex flex-col items-end justify-center">
-            <span 
-              className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}
-            >
-              {currentStatus}
-            </span>
-            
-            {canChangeStatus && (
-              <button
-                onClick={handleStatusChange}
-                disabled={isUpdatingStatus}
-                className={`mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors ${
-                  isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {isUpdatingStatus ? 'Updating...' : `Mark as ${getNextStatus(currentStatus)}`}
-              </button>
-            )}
+        <div className="flex justify-between items-center">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-semibold text-lg">
+              {username.charAt(0)}
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-900">{username}</h3>
+              <p className="text-gray-600 text-sm">{category}</p>
+              <p className="text-gray-800 mt-1 font-medium">{work}</p>
+            </div>
           </div>
           
-          <p className="mt-2 text-black">Date: {date}</p>
-          <div className="flex items-center justify-end gap-2 mt-2">
-            <span className="text-black">{reviewCount} reviews</span>
-            <button 
-              className={`px-3 py-1 bg-gray-200 text-black rounded hover:bg-gray-300 transition-colors ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              onClick={handleViewReviews}
-              disabled={loading}
-              aria-label="Reviews"
-            >
-              {loading ? 'Loading...' : reviewButtonText}
-            </button>
+          <div className="text-right">
+            <div className="flex flex-col items-end justify-center">
+              <span 
+                className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}
+              >
+                {currentStatus}
+              </span>
+              
+              {canChangeStatus && (
+                <button
+                  onClick={handleStatusChange}
+                  disabled={isUpdatingStatus}
+                  className={`mt-2 px-3 py-1 text-xs bg-teal-500 text-white rounded-full hover:bg-teal-600 transition-colors ${
+                    isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isUpdatingStatus ? 'Updating...' : `Mark as ${getNextStatus(currentStatus)}`}
+                </button>
+              )}
+            </div>
+            
+            <p className="mt-2 text-gray-500 text-sm">Date: {date}</p>
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <div className="flex items-center">
+                <span className="text-amber-500 mr-1">★</span>
+                <span className="text-gray-600 text-sm">{reviewCount}</span>
+              </div>
+              <button 
+                className={`px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={handleViewReviews}
+                disabled={loading}
+                aria-label="Reviews"
+              >
+                {loading ? 'Loading...' : reviewButtonText}
+              </button>
+            </div>
+            {error && (
+              <p className="text-red-500 text-sm mt-1" role="alert">
+                {error}
+              </p>
+            )}
           </div>
-          {error && (
-            <p className="text-red-500 text-sm mt-1" role="alert">
-              {error}
-            </p>
-          )}
         </div>
       </div>
 
