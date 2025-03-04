@@ -6,6 +6,22 @@ import { authOptions } from '@/utilities/auth';
 // Use a singleton pattern for Prisma to prevent too many connections
 import { prisma } from '@/utilities/prisma';
 
+// Helper function to extract type and orderId from the URL path
+function getParamsFromUrl(url: string): { type: string | null; orderId: string | null } {
+  try {
+    const urlPath = new URL(url).pathname;
+    const segments = urlPath.split('/').filter(Boolean);
+    // In a path like /api/orders/sold/orderId/review, 'type' would be at index 2 and 'orderId' at index 3
+    return { 
+      type: segments.length > 2 ? segments[2] : null,
+      orderId: segments.length > 3 ? segments[3] : null 
+    };
+  } catch (error) {
+    console.error('Error parsing URL:', error);
+    return { type: null, orderId: null };
+  }
+}
+
 // Get authenticated user ID with better error tracking
 async function getUserId() {
   try {
@@ -53,22 +69,9 @@ async function getUserId() {
   }
 }
 
-// Helper function to extract orderId from the URL path
-function getOrderIdFromUrl(url: string): string | null {
-  try {
-    const urlPath = new URL(url).pathname;
-    const segments = urlPath.split('/').filter(Boolean);
-    // In a path like /api/orders/sold/orderId/review, 'orderId' would be at index 3
-    return segments.length > 3 ? segments[3] : null;
-  } catch (error) {
-    console.error('Error parsing URL:', error);
-    return null;
-  }
-}
-
 export async function GET(request: Request) {
   try {
-    const orderId = getOrderIdFromUrl(request.url);
+    const { orderId } = getParamsFromUrl(request.url);
     
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
@@ -96,10 +99,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const orderId = getOrderIdFromUrl(request.url);
+    const { type, orderId } = getParamsFromUrl(request.url);
     
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+    }
+
+    // Only allow reviews from the "bought" type (buyers only)
+    if (type !== 'bought') {
+      return NextResponse.json(
+        { error: 'Only buyers can submit reviews' }, 
+        { status: 403 }
+      );
     }
 
     const userId = await getUserId();
@@ -108,6 +119,24 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'You must be logged in to submit a review' }, 
         { status: 401 }
+      );
+    }
+
+    // Verify the user is actually the buyer for this order
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { buyerId: true }
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    // Check if the current user is the buyer
+    if (order.buyerId !== userId) {
+      return NextResponse.json(
+        { error: 'Only the buyer can submit a review for this order' }, 
+        { status: 403 }
       );
     }
 

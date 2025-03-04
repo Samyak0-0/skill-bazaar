@@ -1,6 +1,9 @@
 // src/app/api/payment-success/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/utilities/prisma";
+import { PrismaClient } from '@prisma/client';
+import { getServerSession } from "next-auth";
+import { authOptions } from '@/utilities/auth';
 
 //import { PrismaClient } from "@prisma/client";
 
@@ -8,74 +11,72 @@ import { prisma } from "@/utilities/prisma";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { orderId } = body;
-
-    if (!orderId) {
-      console.error("Missing orderId in request");
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: "Missing orderId" },
-        { status: 400 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
 
-    console.log(`Processing payment success for order: ${orderId}`);
-
-    // Get the order details
-    const order = await prisma.order.findUnique({
-      where: {
-        id: orderId,
-      },
-      include: {
-        seller: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        buyer: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+    // Find the current user
+    const buyer = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, name: true }
     });
 
-    if (!order) {
-      console.error(`Order not found: ${orderId}`);
+    if (!buyer) {
       return NextResponse.json(
-        { error: "Order not found" },
+        { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Update the order status to PAID
+    const body = await req.json();
+    const { itemId, totalPrice } = body;
+
+    // Fetch order details to get seller information
+    const order = await prisma.order.findUnique({
+      where: { id: itemId },
+      select: { 
+        sellerId: true, 
+        workTitle: true 
+      }
+    });
+
+    if (!order) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    // Create notification for the seller
+    if (order.sellerId){
+    await prisma.notification.create({
+      data: {
+        type: 'ORDER_PURCHASED',
+        message: `${buyer.name || 'A customer'} has purchased your service: ${order.workTitle}`,
+        userId: order.sellerId, // Specifically target the seller
+        orderId: itemId,
+        read: false
+      }
+    });
+  } else {
+    console.warn("Order has no sellerId, skipping notification.");
+  }
+
+ // Update the order status to PAID
     const updatedOrder = await prisma.order.update({
       where: {
-        id: orderId,
+        id: itemId,
       },
       data: {
         status: "PAID",
       },
     });
 
-    // Create a notification for the seller
-    if (order.sellerId) {
-      const buyerName = order.buyer?.name || "A customer";
-      
-      const notification = await prisma.notification.create({
-        data: {
-          type: "Order Purchased",
-          message: `${buyerName} has purchased your service "${order.workTitle}". Check the order details for more information.`,
-          userId: order.sellerId,
-          orderId: order.id,
-          read: false
-        }
-      });
-      
-      console.log(`Created notification for seller ${order.sellerId}: ${notification.id}`);
-    }
 
     return NextResponse.json({ 
       success: true, 

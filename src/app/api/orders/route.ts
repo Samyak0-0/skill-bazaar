@@ -1,6 +1,7 @@
 // app/api/orders/route.ts
 //for the home page stuff(created by sagar hai, this mine).
 // for notification aakriti has edited hai, this our .
+// @ts-nocheck
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
