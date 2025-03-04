@@ -1,9 +1,8 @@
-//src/components/notification_cmt/Notification.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
 import { Loader2, Bell, CheckCircle } from "lucide-react";
-import { useRouter } from 'next/navigation';//for orderdetails page nav
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 interface NotificationData {
@@ -17,18 +16,6 @@ interface NotificationData {
   orderId?: string;
 }
 
-interface OrderData {
-  id: string;
-  workTitle: string;
-  description: string;
-  rate: string;
-  category: string;
-  serviceId: string;
-  buyerId: string;
-  sellerId: string;
-  status: string;
-}
-
 function Notification() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const { data: session, status: sessionStatus } = useSession();
@@ -38,8 +25,8 @@ function Notification() {
   const [markingAllAsRead, setMarkingAllAsRead] = useState(false);
   const router = useRouter();
 
-
-  const fetchNotifications = async () => {
+  useEffect(() => {
+    const fetchNotifications = async () => {
       if (sessionStatus === "loading") return;
       
       if (sessionStatus === "unauthenticated") {
@@ -48,36 +35,52 @@ function Notification() {
         return;
       }
 
-    try {
-      const response = await fetch('/api/notifications');
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch notifications');
-      }
-      const data = await response.json();
-      if (!data.notifications) {
-        throw new Error('No notifications data in response');
-      }
-      setNotifications(data.notifications);
+      // Log session info for debugging
+      console.log('Session info:', {
+        hasSession: !!session,
+        user: session?.user,
+        userId: session?.user?.id,
+      });
 
-      // Count unread notifications
-      const unread = data.notifications.filter(
-        (notif: NotificationData) => !notif.read
-      ).length;
-      setUnreadCount(unread);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const response = await fetch('/api/notifications', {
+          credentials: 'include',
+          headers: {
+            'Cache-Control': 'no-cache',
+          }
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          console.error('Error response:', errorData);
+          throw new Error(errorData.error || `Failed to fetch notifications: ${response.status}`);
+        }
 
-  useEffect(() => {
+        const data = await response.json();
+        console.log('Raw notifications from API:', data);
+        
+        // Ensure we have notifications
+        const validNotifications = data.notifications || [];
+        
+        setNotifications(validNotifications);
+        
+        // Count unread notifications
+        const unread = validNotifications.filter(
+          (notif: NotificationData) => !notif.read
+        ).length;
+        setUnreadCount(unread);
+        
+        setError(null);
+      } catch (err) {
+        console.error('Fetch error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load notifications');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchNotifications();
-    //poll for new notificationn every 30 sec
-    const intervalId = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(intervalId);
-  }, []);
+  }, [sessionStatus]);
 
   const handleNotificationClick = async (notification: NotificationData) => {
     try {
@@ -114,64 +117,58 @@ function Notification() {
       ));
        // Update unread count
        setUnreadCount(prev => Math.max(0, prev - 1));
-      } catch (err) {
-        console.error('Error marking notification as read:', err);
-      }
-    };
-    //hmmm
-    const markAllAsRead = async () => {
-      if (unreadCount === 0) return;
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    
+    setMarkingAllAsRead(true);
+    try {
+      const response = await fetch(`/api/notifications`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
-      setMarkingAllAsRead(true);
-      try {
-        const response = await fetch(`/api/notifications`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to mark all notifications as read');
-        }
-        
-        // Update local state
-        setNotifications(notifications.map(notif => ({ ...notif, read: true })));
-        setUnreadCount(0);
-      } catch (err) {
-        console.error('Error marking all notifications as read:', err);
-      } finally {
-        setMarkingAllAsRead(false);
+      if (!response.ok) {
+        throw new Error('Failed to mark all notifications as read');
       }
-    };
-    //hmmm
-
-    if (loading && notifications.length === 0) {
-      return (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
-        </div>
-      );
+      
+      // Update local state
+      setNotifications(notifications.map(notif => ({ ...notif, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
+    } finally {
+      setMarkingAllAsRead(false);
     }
-  
-    if (error && notifications.length === 0) {
-      return (
-        <div className="text-red-500 p-4 text-center">
-          <p>Error: {error}</p>
-          <button 
-            onClick={() => fetchNotifications()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Try Again
-          </button>
-        </div>
-      );
-    }
-  
+  };
 
-  
+  // Loading state
+  if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="text-red-500 p-4 text-center">
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
+
+  // Main render
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Notifications</h2>
         <div className="flex items-center space-x-3">
@@ -234,4 +231,4 @@ function Notification() {
   );
 }
   
-  export default Notification;
+export default Notification;

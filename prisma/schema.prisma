@@ -185,6 +185,7 @@ model Notification {
   @@index([orderId])
   
   @@map("Notification")
+  NotificationType NotificationType
 }
 
 model FinancialStatement {
@@ -202,6 +203,12 @@ model FinancialStatement {
 enum FinancialType {
   SPENDINGs
   EARNINGS
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_PURCHASED
+  ORDER_STATUS_UPDATED
 }
 
 //also remember to npx prisma generate after updating here and manny fieds in orders and stuff are optioinal because
