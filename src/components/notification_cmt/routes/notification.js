@@ -3,7 +3,6 @@
 import Notification from '../models/notification.js';
 import { getServerSession } from "next-auth";
 import { authOptions } from '../pages/api/auth/[...nextauth]';
-// import { getSession } from ''; 
 
 const router = express.Router();
 
