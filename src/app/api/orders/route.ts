@@ -88,6 +88,26 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    // Find the current user to get their exact ID
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true }
+    });
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
     const body = await req.json();
     const { workTitle, description, rate, category, serviceId, buyerId, sellerId, status } = body;
 
@@ -98,8 +118,8 @@ export async function POST(req: Request) {
         rate,
         category,
         serviceId,
-        buyerId,
-        sellerId,
+        buyerId: currentUser.id,
+        sellerId: sellerId,
         status,
       },
     });
@@ -107,9 +127,9 @@ export async function POST(req: Request) {
     // Create a notification for the new order
     await prisma.notification.create({
       data: {
-        type: 'New Order',
-        message: `You have new order for ${workTitle} (${category}) - ${rate}`,
-        userId: sellerId || buyerId || '', // Use sellerId or buyerId
+        type: 'ORDER_CREATED',
+        message: `Your skill for ${workTitle} (${category}) - ${rate} is listed`,
+        userId: sellerId, 
         orderId: order.id,
         read: false
       }
