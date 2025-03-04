@@ -24,6 +24,7 @@ export async function PATCH(
       },
     });
     if (updatedOrder.buyerId) {
+
     // Create a notification for the buyer
     await prisma.notification.create({
       data: {
@@ -34,6 +35,7 @@ export async function PATCH(
         read: false
       }
     });
+    
   }
     return NextResponse.json(updatedOrder);
   } catch (error) {
@@ -44,8 +46,6 @@ export async function PATCH(
     );
   }
 }
-
-
 
 export async function GET(
   req: Request,
@@ -105,6 +105,11 @@ export async function GET(
     );
   }
 }
+
+
+
+
+
 // import { NextResponse } from "next/server";
 // import { PrismaClient } from "@prisma/client";
 

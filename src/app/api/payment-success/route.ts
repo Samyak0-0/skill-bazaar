@@ -1,8 +1,10 @@
 // src/app/api/payment-success/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/utilities/prisma";
 
-const prisma = new PrismaClient();
+//import { PrismaClient } from "@prisma/client";
+
+//const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -27,11 +29,13 @@ export async function POST(req: Request) {
       include: {
         seller: {
           select: {
+            id: true,
             name: true,
           },
         },
         buyer: {
           select: {
+            id: true,
             name: true,
           },
         },
@@ -70,7 +74,7 @@ export async function POST(req: Request) {
         }
       });
       
-      console.log(`Created notification for seller: ${notification.id}`);
+      console.log(`Created notification for seller ${order.sellerId}: ${notification.id}`);
     }
 
     return NextResponse.json({ 

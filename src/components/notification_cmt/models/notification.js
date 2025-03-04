@@ -1,3 +1,4 @@
+//src/components/notification_cmt/models/notification.js
 import mongoose from 'mongoose';
 
 const notificationSchema = new mongoose.Schema({

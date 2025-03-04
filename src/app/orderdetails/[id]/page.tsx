@@ -133,60 +133,7 @@ const OrderDetailPage = () => {
     }
   };
 
-  // const handleOrderAction = async (action: 'accept' | 'decline') => {
-  //   if (!orderData || actionInProgress) return;
-
-  //   try {
-  //     setActionInProgress(true);
-      
-  //     // Update order status
-  //     const orderResponse = await fetch(`/api/orders/${orderData.id}`, {
-  //       method: 'PATCH',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ 
-  //         status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' 
-  //       }),
-  //     });
-
-  //     if (!orderResponse.ok) {
-  //       throw new Error(`Failed to ${action} order`);
-  //     }
-
-  //     // Create notification for buyer
-  //     const notificationResponse = await fetch('/api/notifications', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         type: `Order ${action.toUpperCase()}ED`,
-  //         message: `Your order "${orderData.workTitle}" has been ${action}ed by the seller`,
-  //         userId: orderData.buyerId,
-  //         orderId: orderData.id,
-  //         read: false
-  //       }),
-  //     });
-
-  //     if (!notificationResponse.ok) {
-  //       throw new Error('Failed to create notification');
-  //     }
-  //      // Update local state
-  //      setOrderData(prev => prev ? { ...prev, status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' } : null);
-      
-  //      // Show success message and redirect after a brief delay
-  //      setTimeout(() => {
-  //        router.push('/notifications');
-  //      }, 1500);
- 
-  //    } catch (err) {
-  //      setError(err instanceof Error ? err.message : 'An error occurred');
-  //    } finally {
-  //      setActionInProgress(false);
-  //    }
-  //  };
-
+  
 
   const handlePayment = async (
     rate: string,
@@ -200,7 +147,8 @@ const OrderDetailPage = () => {
         buyerId: userId,
       };
 
-      const response = await fetch("http://localhost:3000/api/esewa-payment", {
+      //const response = await fetch("http://localhost:3000/api/esewa-payment", {
+       const response = await fetch("/api/esewa-payment", {  
         method: "POST",
         body: JSON.stringify(requestData),
         headers: {
@@ -208,10 +156,12 @@ const OrderDetailPage = () => {
         },
       });
       if (!response.ok) {
+        const errorText = await response.text();
         console.error(
           "Payment request failed:",
           response.status,
-          response.statusText
+          response.statusText,
+          errorText
         );
         throw new Error(
           `Payment request failed with status ${response.status}`
@@ -219,12 +169,20 @@ const OrderDetailPage = () => {
       }
       const data = await response.json();
       if (!data?.purchasedItemData?.id || !data?.payment?.signature) {
+        console.error("invalid payment data:", data);
         throw new Error("Missing payment data from response.");
       }
 
+      //creating eSewa payment form
       const form = document.createElement("form");
       form.action = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
       form.method = "POST";
+
+      //get base url as fallback
+      const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || window.location.origin).startsWith('http') 
+  ? (process.env.NEXT_PUBLIC_BASE_URL || window.location.origin)
+  : `http://${process.env.NEXT_PUBLIC_BASE_URL || window.location.origin}`;
+
       const formData = {
         amount: `${rateAmt}`,
         tax_amount: "0",
@@ -233,11 +191,15 @@ const OrderDetailPage = () => {
         product_code: "EPAYTEST",
         product_service_charge: "0",
         product_delivery_charge: "0",
-        success_url: "http://localhost:3000/messages",
-        failure_url: "https://developer.esewa.com.np/failure",
+        //success_url: "http://localhost:3000/messages",
+        success_url: `${baseUrl}/messages`, 
+        failure_url: `${baseUrl}/orderdetails/${orderId}?payment=failed`,
+        //failure_url: "https://developer.esewa.com.np/failure",
         signed_field_names: "total_amount,transaction_uuid,product_code",
         signature: `${data.payment.signature}`,
       };
+
+      //apppend form fields
       for (const [key, value] of Object.entries(formData)) {
         const input = document.createElement("input");
         input.type = "hidden";
@@ -245,14 +207,17 @@ const OrderDetailPage = () => {
         input.value = value;
         form.appendChild(input);
       }
+
+      //submit form
       document.body.appendChild(form);
       form.submit();
+
+
     } catch (error) {
       console.error("Error during payment processing:", error);
+     // Display user-friendly error message
+     setError(error instanceof Error ? error.message : "Payment processing failed. Please try again.");
     }
- 
- 
-
 
   };
 

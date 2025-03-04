@@ -31,7 +31,7 @@ export interface Order {
 
 export interface OrderCardProps {
   username: string;
-  skill: string;
+  category: string;
   work: string;
   status: string;
   date: string;

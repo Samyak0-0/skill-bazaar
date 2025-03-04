@@ -1,44 +1,81 @@
-// First file: review route with enhanced debugging
+// app/api/orders/[type]/[orderId]/review/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utilities/auth';
 
-const prisma = new PrismaClient();
+// Use a singleton pattern for Prisma to prevent too many connections
+import { prisma } from '@/utilities/prisma';
 
-// Temporary function to get user ID with fallback for debugging
+// Get authenticated user ID with better error tracking
 async function getUserId() {
   try {
     const session = await getServerSession(authOptions);
-    console.log('Authentication session:', JSON.stringify(session, null, 2));
     
-    // If we have a valid session with user ID, use it
+    // Enhanced logging for debugging session issues
+    console.log('Session object in review route:', JSON.stringify({
+      exists: !!session,
+      hasUser: !!session?.user,
+      hasUserId: !!session?.user?.id,
+      email: session?.user?.email,
+    }, null, 2));
+    
+    // If we have a user ID in the session, use it directly
     if (session?.user?.id) {
+      console.log('Using authenticated user ID from session:', session.user.id);
       return session.user.id;
     }
     
-    // For debugging purposes: fallback to a hardcoded ID
-    // IMPORTANT: Remove this in production!
-    console.warn('⚠️ Using fallback user ID for development - REMOVE IN PRODUCTION');
-    return "cm66ug29w0000v7ls10ac6rga"; // Your original dummy ID
+    // If we have an email but no ID, try to fetch the user from the database
+    if (session?.user?.email) {
+      console.log('Fetching user ID from database using email:', session.user.email);
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true }
+      });
+      
+      if (user?.id) {
+        console.log('Found user ID in database:', user.id);
+        return user.id;
+      }
+    }
+    
+    // Development fallback with clear warning
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('⚠️ No valid user session found in review route - using fallback ID for development only');
+      return "";
+    }
+    
+    console.error('No user session found in review route and running in production - authentication failed');
+    return null;
   } catch (error) {
-    console.error('Error getting user session:', error);
-    // Return null to indicate authentication failed
+    console.error('Error getting user session in review route:', error);
+    return process.env.NODE_ENV === 'production' ? null : "";
+  }
+}
+
+// Helper function to extract orderId from the URL path
+function getOrderIdFromUrl(url: string): string | null {
+  try {
+    const urlPath = new URL(url).pathname;
+    const segments = urlPath.split('/').filter(Boolean);
+    // In a path like /api/orders/sold/orderId/review, 'orderId' would be at index 3
+    return segments.length > 3 ? segments[3] : null;
+  } catch (error) {
+    console.error('Error parsing URL:', error);
     return null;
   }
 }
 
-export async function GET(
-  request: Request, 
-  { params }: { params: { type: string; orderId: string } }
-) {
-  if (!params?.orderId) {
-    return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
-  }
-
+export async function GET(request: Request) {
   try {
+    const orderId = getOrderIdFromUrl(request.url);
+    
+    if (!orderId) {
+      return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+    }
+
     const reviews = await prisma.review.findMany({
-      where: { orderId: params.orderId },
+      where: { orderId },
       include: { 
         reviewer: { 
           select: { name: true } 
@@ -57,15 +94,14 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: Request, 
-  { params }: { params: { type: string; orderId: string } }
-) {
-  if (!params?.orderId) {
-    return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
-  }
-
+export async function POST(request: Request) {
   try {
+    const orderId = getOrderIdFromUrl(request.url);
+    
+    if (!orderId) {
+      return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+    }
+
     const userId = await getUserId();
     
     if (!userId) {
@@ -90,7 +126,7 @@ export async function POST(
         rating,
         comment,
         reviewerId: userId,
-        orderId: params.orderId
+        orderId
       },
       include: {
         reviewer: {

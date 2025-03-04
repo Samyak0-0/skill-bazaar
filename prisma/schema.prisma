@@ -54,8 +54,8 @@ model User {
   location      String?
   contacts      String[]
 
-  totalSpending  Float     @default(0.0)
-  totalEarnings  Float     @default(0.0)
+  totalSpending Float @default(0.0)
+  totalEarnings Float @default(0.0)
 
   services      Service[]      @relation("UserServices")
   buyerOrders   Order[]        @relation("BuyerOrders")
@@ -172,22 +172,26 @@ model Notification {
   type      String
   message   String
   userId    String
+  orderId   String?
   read      Boolean  @default(false) @map("isRead")
   createdAt DateTime @default(now()) @map("date")
   updatedAt DateTime @default(now()) @map("updatedAt")
-  orderId   String?
+ 
 
   order Order? @relation("OrderNotifications", fields: [orderId], references: [id])
   user  User   @relation("UserNotifications", fields: [userId], references: [id])
 
+  @@index([userId])
+  @@index([orderId])
+  
   @@map("Notification")
 }
 
 model FinancialStatement {
-  id          String   @id @default(cuid()) @map("_id")
+  id          String        @id @default(cuid()) @map("_id")
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  date        DateTime @default(now())
+  user        User          @relation(fields: [userId], references: [id])
+  date        DateTime      @default(now())
   description String
   amount      Float
   type        FinancialType
@@ -195,8 +199,10 @@ model FinancialStatement {
   @@index([userId, date])
 }
 
-
 enum FinancialType {
   SPENDINGs
   EARNINGS
 }
+
+//also remember to npx prisma generate after updating here and manny fieds in orders and stuff are optioinal because
+//they are not inputted at the time of creation, and they cant be requested and many loopholes AHHHHHHHHHHH.

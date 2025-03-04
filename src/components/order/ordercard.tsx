@@ -17,7 +17,7 @@ const getStatusColor = (status: string) => {
 
 export default function OrderCard({ 
   username, 
-  skill, 
+  category, 
   work, 
   status, 
   date, 
@@ -83,7 +83,7 @@ export default function OrderCard({
           </div>
           <div>
             <p><strong>Username</strong>: {username}</p>
-            <p><strong>Skill</strong>: {skill}</p>
+            <p><strong>Category</strong>: {category}</p>
             <p><strong>Work</strong>: {work}</p>
           </div>
         </div>

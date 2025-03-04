@@ -1,3 +1,5 @@
+
+//src/app/api/esewa-payment/route.js
 import { getEsewaPaymentHash, verifyEsewaPayment } from "@/utilities/esewa";
 import { prisma } from "@/utilities/prisma";
 import { NextResponse } from "next/server";
@@ -30,7 +32,7 @@ export async function GET(req) {
     // Fetch existing contacts
     const buyer = await prisma.user.findUnique({
       where: { id: buyerId },
-      select: { contacts: true },
+      select: { contacts: true, name: true},
     });
 
     const seller = await prisma.user.findUnique({
@@ -81,10 +83,37 @@ export async function GET(req) {
       data: { status: "COMPLETED" },
     });
 
+    //notification - aakriti has added stuffs
+    // Fetch the order details
+
+    const orderData = await prisma.order.findUnique({
+      where: { id: purchasedItemData.order.id },
+      select: { workTitle: true, id: true }
+    });
+
+     // Update the order status to PAID
+     await prisma.order.update({
+      where: { id: purchasedItemData.order.id },
+      data: { status: "PAID" },
+    });
+
+   // Create a notification for the seller that their product has been purchased
+   await prisma.notification.create({
+    data: {
+      type: "Order Purchased",
+      message: `${buyer?.name || "A customer"} has purchased your service "${orderData?.workTitle}". Check your orders for more information.`,
+      userId: sellerId,
+      orderId: purchasedItemData.order.id,
+      read: false
+    }
+  });
+  //sakkyo hai
+
+
     // Respond with success message
     return NextResponse.json({
       success: true,
-      message: "Payment successful",
+      message: "Payment successful and seller has been notified",
       paymentData,
     });
   } catch (error) {
@@ -132,6 +161,7 @@ export async function POST(req, res) {
       purchasedItemData,
     });
   } catch (error) {
+    console.error("Error initiating payment:", error);
     return NextResponse.json({
       success: false,
       error: error.message,

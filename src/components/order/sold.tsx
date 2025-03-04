@@ -90,7 +90,7 @@ export default function Sold() {
             <OrderCard
               key={order.id}
               username={order.seller?.name || 'Unknown User'} // Changed to seller for sold orders
-              skill={order.service?.name || 'Unknown Service'}
+              category={order.category || 'Unknown Category'}
               work={order.workTitle || 'Untitled Work'}
               status={order.status}
               date={new Date(order.createdAt).toLocaleDateString()}
