@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronRight, Loader2, X, Star } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { Plus } from "lucide-react";
 
 interface OrderData {
   id: string;
@@ -11,7 +12,6 @@ interface OrderData {
   rate: string;
   category: string;
   serviceId: string;
-  buyerId: string;
   sellerId: string;
   status: string;
   userId: string;
@@ -130,17 +130,18 @@ const Home_page = () => {
     );
   };
 
-  const OrdersSection = ({ title, orders, scrollContainerRef, isLoading }: {
+  const OrdersSection = ({ title, orders, scrollContainerRef, isLoading, isRecommended }: {
     title: string;
     orders: OrderData[];
     scrollContainerRef: React.RefObject<HTMLDivElement>;
     isLoading?: boolean;
+    isRecommended?: boolean;
   }) => (
     <div className="mb-8 relative">
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-3xl font-bold text-white pt-2">{title}</h2>
+        <h2 className="text-3xl font-bold text-black pt-2">{title}</h2>
         {isLoading && (
-          <Loader2 className="animate-spin w-6 h-6 text-blue-500 mt-2" />
+          <Loader2 className="animate-spin w-6 h-6 text-[#0cb9c1]-500 mt-2" />
         )}
       </div>
       <div className="relative">
@@ -152,7 +153,7 @@ const Home_page = () => {
             <div 
               key={index} 
               onClick={() => router.push(`/orderdetails/${order.id}`)}
-              className={`min-w-[18.75rem] h-[14.0625rem] p-4 mt-3 mb-2 border rounded-lg shadow-sm transition-all duration-500 cursor-pointer bg-gray-300 hover:scale-105 ${isLoading ? 'opacity-50' : 'opacity-100'} animate-fadeIn relative`}
+              className={`min-w-[18.75rem] h-[14.0625rem] p-4 mt-3 mb-2 border rounded-lg shadow-sm transition-all duration-500 cursor-pointer bg-[rgba(12,185,193,0.3)] hover:bg-[rgba(12,185,193,0.6)] ${isLoading ? 'opacity-50' : 'opacity-100'} animate-fadeIn relative`}
               style={{
                 animationDelay: `${index * 100}ms`
               }}
@@ -162,12 +163,17 @@ const Home_page = () => {
                 {renderRatingStars(order.averageRating || 0)}
               </div> 
               
-              <h3 className="font-medium mb-3 text-black">Work: {order.workTitle}</h3>
-              <p className="font-medium text-black mb-4 line-clamp-2">Description: {truncateDescription(order.description)}</p>
-              <p className="font-medium text-black mb-3">Rate: {order.rate}</p>
-              <p className="font-medium text-black mb-1">Category: {order.category}</p>
+              <h3 className="font-medium text-lg font-semibold mb-4 text-black">Work: {order.workTitle}</h3>
+              <p className="font-medium text-black mb-3 line-clamp-2">Description: {truncateDescription(order.description)}</p>
+             <p className="font-medium text-black mb-3">Category: {order.category}</p>
+             
+             <div className="absolute bottom-5 right-3 flex flex-col items-end">
+              <span className="font-medium text-lg font-semibold text-black mb-3"> {order.rate}</span>
+              
               {/* <p className="font-medium text-black mb-3">Rating: {renderRatingStars(order.averageRating || 0)}</p> */}
             </div>
+            </div>
+            
           ))}
           {isLoading && orders.length === 0 && (
             <div className="flex items-center justify-center w-full h-[14.0625rem]">
@@ -178,80 +184,86 @@ const Home_page = () => {
 
         <button 
           onClick={() => scroll('right', scrollContainerRef)} 
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-black rounded-full p-2 shadow-md"
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#ffffff] hover:bg-[#a6b5c7] rounded-full p-4 shadow-lg"
+        
         >
-          <ChevronRight size={10} />
+          <ChevronRight size={24} />
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="pt-4 px-2 sm:px-4 lg:px-6 w-full max-w-[1350px] mx-auto">
-      <OrdersSection 
-        title="Recommended" 
-        orders={orders} 
-        scrollContainerRef={recommendedScrollContainer}
-        isLoading={loading}
-      />
-
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">
-          <h2 className="text-3xl font-bold text-white">Categories</h2>
-          {selectedCategory && (
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition-colors duration-200"
-            >
-              <X size={14} />
-              Clear
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {availableCategories.map((category, index) => (
-            <div
-              key={index}
-              onClick={() => setSelectedCategory(
-                category === selectedCategory ? null : category
-              )}
-              className={`font-medium min-w-[9.375rem] p-4 border rounded-lg shadow-sm transition-all duration-300 cursor-pointer bg-gray-300 text-black text-center hover:scale-105 hover:shadow-lg ${
-                selectedCategory === category ? 'ring-2 ring-blue-500 transform scale-105' : 'hover:bg-gray-200'
-              }`}
-            >
-              {category}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {selectedCategory && (
+    <div className="bg-[#f2f2f2] min-h-screen"> 
+      <div className="pt-4 px-2 sm:px-4 lg:px-6 w-full max-w-[1350px] mx-auto">
         <OrdersSection 
-          title={`${selectedCategory} Orders`}
-          orders={categoryOrders}
-          scrollContainerRef={categoryScrollContainer}
-          isLoading={isChangingCategory}
+          title="Recommended" 
+          orders={orders} 
+          scrollContainerRef={recommendedScrollContainer}
+          isLoading={loading}
+          isRecommended={true}
         />
-      )}
 
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800">Categories</h2>
+            {selectedCategory && (
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[rgba(12,185,193,0.2)] hover:bg-[rgba(12,185,193,0.5)] text-gray-700 text-sm transition-colors duration-200"
+              >
+                <X size={14} />
+                Clear
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {availableCategories.map((category, index) => (
+              <div
+                key={index}
+                onClick={() => setSelectedCategory(
+                  category === selectedCategory ? null : category
+                )}
+                className={`font-medium min-w-[9.375rem] p-4 border rounded-lg shadow-sm transition-all duration-300 cursor-pointer bg-blue-50 text-black text-center hover:bg-[rgba(12,185,193,0.6)] ${
+                  selectedCategory === category ? 'ring-2 ring-[#0cb9c1] transform scale-105' : ''
+                }`}
+              >
+                {category}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {selectedCategory && (
+          <OrdersSection 
+            title={`${selectedCategory} Orders`}
+            orders={categoryOrders}
+            scrollContainerRef={categoryScrollContainer}
+            isLoading={isChangingCategory}
+          />
+        )}
+
+        <style jsx>{`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+          .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
           }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-      `}</style>
+        `}</style>
+      </div>
     </div>
   );
 };
+
+   
 
 export default Home_page;
 
