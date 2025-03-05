@@ -16,15 +16,6 @@ import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { MessagingContext } from "@/provider/MessagingContext";
-interface Order {
-  id: string;
-  name: string;
-  type: "sold" | "bought";
-  price: number;
-  status: string;
-  client?: string;
-  date: string;
-}
 
 interface UserData {
   name: string;
@@ -48,9 +39,6 @@ const UserProfile = () => {
   const [newInterest, setNewInterest] = useState("");
   const { data } = useSession();
 
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [ordersLoading, setOrdersLoading] = useState(true);
-  const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -106,33 +94,7 @@ const UserProfile = () => {
 
     fetchUserData();
   }, [data?.user?.email]);
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (!data?.user?.email) return;
-
-      setOrdersLoading(true);
-      setOrdersError(null);
-
-      try {
-        const response = await fetch(`/api/orders`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-
-        const data = await response.json();
-        setOrders(data.orders || []);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setOrdersError('Failed to load orders');
-      } finally {
-        setOrdersLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [data?.user?.email]);
-
+  
 
   useEffect(() => {
     if (!data?.user?.email) return;
@@ -201,7 +163,6 @@ const UserProfile = () => {
       console.error("Error adding interest:", error);
     }
   };
-
   const InterestsView = () => (
     <div className="space-y-8 w-full">
       <div className="flex flex-col space-y-4">
@@ -268,102 +229,66 @@ const UserProfile = () => {
     </div>
   );
 
-  const OrdersView = () => {
-    const pendingOrders = orders.filter(order => order.status.toLowerCase() === 'pending').length;
-    const activeProjects = orders.filter(order => order.status.toLowerCase() === 'in progress').length;
-  
-    const getStatusClass = (status: string) => {
-      const lowercaseStatus = status.toLowerCase();
-      switch (lowercaseStatus) {
-        case 'completed':
-          return 'bg-green-100 text-green-700';
-        case 'pending':
-          return 'bg-yellow-100 text-yellow-700';
-        case 'in progress':
-          return 'bg-blue-100 text-blue-700';
-        default:
-          return 'bg-gray-100 text-gray-700';
-      }
-    };
-  
-    return (
-      <div className="space-y-8 w-full">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
-        
-        {ordersLoading ? (
-          <p className="text-center text-gray-500">Loading orders...</p>
-        ) : ordersError ? (
-          <p className="text-center text-red-500">{ordersError}</p>
-        ) : (
-          <>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="p-6 bg-gray-100 rounded-xl text-center">
-                <p className="text-base text-gray-600 mb-2">Pending Orders</p>
-                <p className="text-3xl font-bold text-yellow-600">{pendingOrders}</p>
-              </div>
-              <div className="p-6 bg-gray-100 rounded-xl text-center">
-                <p className="text-base text-gray-600 mb-2">Completed Orders</p>
-                <p className="text-3xl font-bold text-green-600">
-                  {userData.finances.completedJobs}
-                </p>
-              </div>
-              <div className="p-6 bg-gray-100 rounded-xl text-center">
-                <p className="text-base text-gray-600 mb-2">Active Projects</p>
-                <p className="text-3xl font-bold text-blue-600">{activeProjects}</p>
-              </div>
-            </div>
-            
-            <div className="mt-8">
-              <h4 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h4>
-              
-              {orders.length === 0 ? (
-                <p className="text-center text-gray-500">No orders found</p>
-              ) : (
-                <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div 
-                      key={order.id} 
-                      className="bg-white p-4 rounded-lg shadow-sm border"
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium text-gray-800">{order.name}</p>
-                          {order.client && (
-                            <p className="text-sm text-gray-500">Client: {order.client}</p>
-                          )}
-                          <p className="text-sm text-gray-500">
-                            ${order.price.toFixed(2)} | {new Date(order.date).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <span 
-                          className={`px-3 py-1 rounded-full text-sm ${getStatusClass(order.status)}`}
-                        >
-                          {order.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
+  const OrdersView = () => (
+    <div className="space-y-8 w-full">
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Pending Orders</p>
+          <p className="text-3xl font-bold text-yellow-600">3</p>
+        </div>
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Completed Orders</p>
+          <p className="text-3xl font-bold text-green-600">
+            {userData.finances.completedJobs}
+          </p>
+        </div>
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Active Projects</p>
+          <p className="text-3xl font-bold text-blue-600">2</p>
+        </div>
       </div>
-    );
-  };
-
+      <div className="mt-8">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h4>
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium text-gray-800">Web Development Project</p>
+                <p className="text-sm text-gray-500">Client: Tech Solutions Inc.</p>
+              </div>
+              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                Completed
+              </span>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium text-gray-800">Mobile App Design</p>
+                <p className="text-sm text-gray-500">Client: Startup Innovations</p>
+              </div>
+              <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                In Progress
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
   const FinancesView = () => (
     <div className="space-y-8 w-full">
       <h3 className="text-2xl font-semibold text-gray-800 mb-4">Financial Overview</h3>
       <div className="grid grid-cols-3 gap-6">
         <div className="p-6 bg-gray-100 rounded-xl text-center">
-          <p className="text-base text-gray-600 mb-2">Total Income</p>
+          <p className="text-base text-gray-600 mb-2">Total Earnings</p>
           <p className="text-3xl font-bold text-teal-600">
             ${userData.finances.earnings.toFixed(2)}
           </p>
         </div>
         <div className="p-6 bg-gray-100 rounded-xl text-center">
-          <p className="text-base text-gray-600 mb-2">Total Expenses</p>
+          <p className="text-base text-gray-600 mb-2">Total Spendings</p>
           <p className="text-3xl font-bold text-red-600">
             ${userData.finances.spendings.toFixed(2)}
           </p>
