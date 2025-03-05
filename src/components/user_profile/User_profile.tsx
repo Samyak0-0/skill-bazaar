@@ -40,7 +40,7 @@ const UserProfile = () => {
   const { data } = useSession();
 
   const [userData, setUserData] = useState<UserData>({
-    name: "Jane Doe",
+    name: "",
     email: "",
     phone: "",
     location: "",
