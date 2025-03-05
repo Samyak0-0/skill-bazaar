@@ -33,14 +33,14 @@ interface UserData {
 }
 
 const UserProfile = () => {
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("interests");
   const [isEditing, setIsEditing] = useState(false);
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const { data } = useSession();
 
   const [userData, setUserData] = useState<UserData>({
-    name: "",
+    name: "Jane Doe",
     email: "",
     phone: "",
     location: "",
@@ -162,214 +162,141 @@ const UserProfile = () => {
     }
   };
 
-  const handleSaveProfile = async () => {
-    if (!data?.user?.email) return;
-
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/add-userdetails",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userMail: data.user.email,
-            location: userData.location,
-            phone: userData.phone,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
-      }
-
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
-  };
-
-  const ProfileView = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            {userData.avatar && (
-              <Image
-                src={userData.avatar}
-                alt={userData.name}
-                width={200}
-                height={200}
-                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
-              />
-            )}
-            <button className="absolute bottom-0 right-0 p-1 bg-white rounded-full shadow-lg">
-              <Camera className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
-          <div>
-            {isEditing ? (
-              <input
-                type="text"
-                value={userData.name}
-                onChange={(e) =>
-                  setUserData({ ...userData, name: e.target.value })
-                }
-                className="text-2xl font-semibold text-gray-900 border rounded px-2"
-              />
-            ) : (
-              <h2 className="text-2xl font-semibold text-gray-900">
-                {userData.name}
-              </h2>
-            )}
-            <p className="text-gray-500">{userData.email}</p>
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            if (isEditing) {
-              handleSaveProfile();
-            } else {
-              setIsEditing(true);
-            }
-          }}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          {isEditing ? "Save Profile" : "Edit Profile"}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4">
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center space-x-2 text-gray-600">
-            <Phone className="w-4 h-4" />
-            {isEditing ? (
-              <input
-                type="text"
-                value={userData.phone}
-                onChange={(e) =>
-                  setUserData({ ...userData, phone: e.target.value })
-                }
-                className="flex-1 border rounded px-2 py-1"
-                placeholder="Enter phone number"
-              />
-            ) : (
-              <span>{userData.phone || " . . . "}</span>
-            )}
-          </div>
-        </div>
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <div className="flex items-center space-x-2 text-gray-600">
-            <MapPin className="w-4 h-4" />
-            {isEditing ? (
-              <input
-                type="text"
-                value={userData.location}
-                onChange={(e) =>
-                  setUserData({ ...userData, location: e.target.value })
-                }
-                className="flex-1 border rounded px-2 py-1"
-                placeholder="Enter location"
-              />
-            ) : (
-              <span>{userData.location || ". . ."}</span>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const SkillsView = () => (
-    <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4 text-gray-800">My Skills</h3>
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          {userData.skills.map((skill) => (
-            <span
-              key={skill}
-              className="px-4 py-2 bg-blue-100 text-blue-600 rounded-full text-sm"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.target.value)}
-            placeholder="Add new skill"
-            className="border rounded p-2"
-          />
-          <button
-            onClick={handleAddSkill}
-            className="px-4 py-2 border border-blue-500 text-blue-500 rounded-lg hover:bg-blue-50"
-          >
-            Add Skill
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   const InterestsView = () => (
-    <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4 text-gray-800">My Interests</h3>
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
+    <div className="space-y-8 w-full">
+      <div className="flex flex-col space-y-4">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Interests</h3>
+        <div className="flex flex-wrap gap-3">
           {userData.interests.map((interest) => (
             <span
               key={interest}
-              className="px-4 py-2 bg-green-100 text-green-600 rounded-full text-sm"
+              className="px-5 py-3 bg-gray-200 text-gray-900 rounded-full text-base font-medium"
             >
               {interest}
             </span>
           ))}
         </div>
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={newInterest}
-            onChange={(e) => setNewInterest(e.target.value)}
-            placeholder="Add new interest"
-            className="border rounded p-2"
-          />
-          <button
-            onClick={handleAddInterest}
-            className="px-4 py-2 border border-green-500 text-green-500 rounded-lg hover:bg-green-50"
-          >
-            Add Interest
-          </button>
+      </div>
+      <div className="flex items-center space-x-4">
+        <input
+          type="text"
+          value={newInterest}
+          onChange={(e) => setNewInterest(e.target.value)}
+          placeholder="Add new interest"
+          className="flex-grow border-2 border-gray-300 rounded-lg p-3 text-base text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+        />
+        <button
+          onClick={handleAddInterest}
+          className="px-6 py-3 bg-teal-500 text-white rounded-lg text-base font-semibold hover:bg-teal-600 transition-colors"
+        >
+          Add Interest
+        </button>
+      </div>
+    </div>
+  );
+
+  const SkillsView = () => (
+    <div className="space-y-8 w-full">
+      <div className="flex flex-col space-y-4">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Skills</h3>
+        <div className="flex flex-wrap gap-3">
+          {userData.skills.map((skill) => (
+            <span
+              key={skill}
+              className="px-5 py-3 bg-gray-200 text-gray-900 rounded-full text-base font-medium"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="flex items-center space-x-4">
+        <input
+          type="text"
+          value={newSkill}
+          onChange={(e) => setNewSkill(e.target.value)}
+          placeholder="Add new skill"
+          className="flex-grow border-2 border-gray-300 rounded-lg p-3 text-base text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+        />
+        <button
+          onClick={handleAddSkill}
+          className="px-6 py-3 bg-teal-500 text-white rounded-lg text-base font-semibold hover:bg-teal-600 transition-colors"
+        >
+          Add Skill
+        </button>
+      </div>
+    </div>
+  );
+
+  const OrdersView = () => (
+    <div className="space-y-8 w-full">
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Pending Orders</p>
+          <p className="text-3xl font-bold text-yellow-600">3</p>
+        </div>
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Completed Orders</p>
+          <p className="text-3xl font-bold text-green-600">
+            {userData.finances.completedJobs}
+          </p>
+        </div>
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Active Projects</p>
+          <p className="text-3xl font-bold text-blue-600">2</p>
+        </div>
+      </div>
+      <div className="mt-8">
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h4>
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium text-gray-800">Web Development Project</p>
+                <p className="text-sm text-gray-500">Client: Tech Solutions Inc.</p>
+              </div>
+              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                Completed
+              </span>
+            </div>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium text-gray-800">Mobile App Design</p>
+                <p className="text-sm text-gray-500">Client: Startup Innovations</p>
+              </div>
+              <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                In Progress
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 
   const FinancesView = () => (
-    <div className="space-y-6">
-      <h3 className="text-xl font-medium mb-4 text-gray-800">
-        Financial Overview
-      </h3>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-gray-600">Total Earnings</p>
-          <p className="text-2xl font-semibold text-blue-600">
-            ${userData.finances.earnings}
+    <div className="space-y-8 w-full">
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4">Financial Overview</h3>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Total Income</p>
+          <p className="text-3xl font-bold text-teal-600">
+            ${userData.finances.earnings.toFixed(2)}
           </p>
         </div>
-        <div className="p-4 bg-orange-50 rounded-lg">
-          <p className="text-sm text-gray-600">Total Spendings</p>
-          <p className="text-2xl font-semibold text-orange-600">
-            ${userData.finances.spendings}
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Total Expenses</p>
+          <p className="text-3xl font-bold text-red-600">
+            ${userData.finances.spendings.toFixed(2)}
           </p>
         </div>
-        <div className="p-4 bg-green-50 rounded-lg">
-          <p className="text-sm text-gray-600">Orders Received</p>
-          <p className="text-2xl font-semibold text-green-600">
-            {userData.finances.completedJobs}
+        <div className="p-6 bg-gray-100 rounded-xl text-center">
+          <p className="text-base text-gray-600 mb-2">Net Profit</p>
+          <p className="text-3xl font-bold text-green-600">
+            ${(userData.finances.earnings - userData.finances.spendings).toFixed(2)}
           </p>
         </div>
       </div>
@@ -377,55 +304,61 @@ const UserProfile = () => {
   );
 
   const tabs = [
-    { id: "profile", label: "Profile", icon: User, component: ProfileView },
-    { id: "skills", label: "Skills", icon: Settings, component: SkillsView },
-    {
-      id: "interests",
-      label: "Interests",
-      icon: Heart,
-      component: InterestsView,
-    },
-    {
-      id: "finances",
-      label: "Finances",
-      icon: Wallet,
-      component: FinancesView,
-    },
+    { id: "interests", label: "Interests", component: InterestsView },
+    { id: "skills", label: "Skills", component: SkillsView },
+    { id: "orders", label: "Orders", component: OrdersView },
+    { id: "finances", label: "Finances", component: FinancesView },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="mb-6 border-b">
-            <div className="flex space-x-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`pb-4 px-2 relative ${
-                    activeTab === tab.id
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-500"
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <tab.icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </div>
+    <div className="min-h-screen bg-teal-50 flex flex-col">
+      <div className="container mx-auto px-6 py-12 flex-grow">
+        <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-7xl mx-auto space-y-12">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-8">
+              <div className="w-40 h-40 rounded-full relative">
+                <Image
+                  src={userData.avatar || "/default-avatar.png"}
+                  alt={userData.name}
+                  fill
+                  className="rounded-full object-cover"
+                />
+                <button className="absolute bottom-0 right-0 bg-white rounded-full p-3 shadow-lg">
+                  <Camera className="w-6 h-6 text-gray-600" />
                 </button>
-              ))}
+              </div>
+              <div>
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">{userData.name}</h2>
+                <p className="text-xl text-gray-600">{userData.email}</p>
+              </div>
             </div>
+            <button 
+              onClick={() => signOut()}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <LogOut className="w-8 h-8" />
+            </button>
           </div>
 
-          {tabs.find((tab) => tab.id === activeTab)?.component()}
-          <button
-  onClick={() => signOut()}
-  className="mt-8 flex items-center text-red-500 hover:text-red-600"
->
-  <LogOut className="w-4 h-4 mr-2" />
-  <span>Log out</span>
-</button>
+          <div className="flex justify-center space-x-6">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-8 py-4 rounded-full text-base font-semibold transition-all duration-300 ${
+                  activeTab === tab.id 
+                    ? "bg-teal-500 text-white shadow-md" 
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-8 bg-gray-50 rounded-2xl">
+            {tabs.find((tab) => tab.id === activeTab)?.component()}
+          </div>
         </div>
       </div>
     </div>
