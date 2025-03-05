@@ -201,7 +201,7 @@ model FinancialStatement {
 }
 
 enum FinancialType {
-  SPENDINGs
+  SPENDINGS
   EARNINGS
 }
 
