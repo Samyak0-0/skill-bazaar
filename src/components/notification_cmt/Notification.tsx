@@ -18,7 +18,7 @@ interface NotificationData {
 
 function Notification() {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
-  const { data: session, status: sessionStatus } = useSession();
+  const {data: session, status: sessionStatus } = useSession();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -168,19 +168,20 @@ function Notification() {
 
   // Main render
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="bg-[#f2f2f2] min-h-screen"> 
+    <div className="max-w-4xl mx-auto px-4 py-6 bg-[#f2f2f2]">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Notifications</h2>
         <div className="flex items-center space-x-3">
           {unreadCount > 0 && (
             <>
-              <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+             <div className="bg-[#0cb9c1] text-white px-3 py-1 rounded-full text-sm font-medium">
                 {unreadCount} new
               </div>
               <button
                 onClick={markAllAsRead}
                 disabled={markingAllAsRead}
-                className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                className="text-sm text-[#0cb9c1] hover:text-blue-800 flex items-center"
               >
                 {markingAllAsRead ? (
                   <Loader2 className="animate-spin w-3 h-3 mr-1" />
@@ -204,31 +205,34 @@ function Notification() {
           {notifications.map((notification) => (
             <div
               key={notification.id}
-              className={`rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md flex ${
-                notification.read ? 'bg-gray-100' : 'bg-[#E5F0F3] border-l-4 border-blue-500'
-              }`}
+              className={`rounded-lg p-4 cursor-pointer transition-all duration-200 
+                ${!notification.read ? 'bg-[rgba(12,185,193,0.3)]' : 'bg-white'}
+                border border-[#D0E3E8] hover:shadow-md`}
               onClick={() => handleNotificationClick(notification)}
             >
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                  {notification.type}
-                  {!notification.read && (
-                    <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
-                  )}
-                </h3>
-                <p className="text-gray-600">
-                  {notification.message}
-                </p>
-                <small className="text-gray-500 block mt-2">
-                  {new Date(notification.createdAt).toLocaleString()}
-                </small>
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-gray-800 mb-1">
+                    Notification
+                    {!notification.read && (
+                      <span className="ml-2 inline-block w-2 h-2 bg-[#0cb9c1] rounded-full"></span>
+                    )}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {notification.message}
+                  </p>
+                  <small className="text-gray-500 block mt-2 text-xs">
+                    {new Date(notification.createdAt).toLocaleString()}
+                  </small>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
     </div>
+    </div>
   );
 }
-  
+
 export default Notification;
