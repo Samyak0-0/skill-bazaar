@@ -17,6 +17,28 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { MessagingContext } from "@/provider/MessagingContext";
 
+// Define the Order interface
+interface Order {
+  id: string;
+  title?: string;
+  price?: number;
+  status: 'pending' | 'in_progress' | 'active' | 'completed' | 'cancelled';
+  buyerId?: string;
+  sellerId?: string;
+  buyer?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  seller?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  Review?: any[];
+  createdAt?: Date;
+}
+
 interface UserData {
   name: string;
   email: string;
@@ -38,7 +60,9 @@ const UserProfile = () => {
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const { data } = useSession();
-
+  const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [activeOrders, setActiveOrders] = useState(0);
 
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -94,7 +118,6 @@ const UserProfile = () => {
 
     fetchUserData();
   }, [data?.user?.email]);
-  
 
   useEffect(() => {
     if (!data?.user?.email) return;
@@ -105,7 +128,36 @@ const UserProfile = () => {
       avatar: data.user.image || "",
       email: data.user.email || "",
     }));
+    
+    // Call fetchOrders when the component mounts
+    fetchOrders();
   }, [data?.user?.email]);
+
+  // Updated fetchOrders function
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/add-order');
+      
+      if (!response.ok) {
+        console.error("Failed to fetch seller orders:", response.statusText);
+        return;
+      }
+      
+      const orders = await response.json();
+      setSellerOrders(orders);
+      
+      // Count orders by status
+      const pending = orders.filter((order: Order) => order.status === 'pending').length;
+      const active = orders.filter((order: Order) => 
+        order.status === 'in_progress' || order.status === 'active'
+      ).length;
+      
+      setPendingOrders(pending);
+      setActiveOrders(active);
+    } catch (error) {
+      console.error("Error fetching seller orders:", error);
+    }
+  };
 
   const handleAddSkill = async () => {
     if (!newSkill || !data?.user?.email) return;
@@ -163,6 +215,7 @@ const UserProfile = () => {
       console.error("Error adding interest:", error);
     }
   };
+  
   const InterestsView = () => (
     <div className="space-y-8 w-full">
       <div className="flex flex-col space-y-4">
@@ -231,11 +284,11 @@ const UserProfile = () => {
 
   const OrdersView = () => (
     <div className="space-y-8 w-full">
-      <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders (Seller)</h3>
       <div className="grid grid-cols-3 gap-6">
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Pending Orders</p>
-          <p className="text-3xl font-bold text-yellow-600">3</p>
+          <p className="text-3xl font-bold text-yellow-600">{pendingOrders}</p>
         </div>
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Completed Orders</p>
@@ -245,38 +298,46 @@ const UserProfile = () => {
         </div>
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Active Projects</p>
-          <p className="text-3xl font-bold text-blue-600">2</p>
+          <p className="text-3xl font-bold text-blue-600">{activeOrders}</p>
         </div>
       </div>
       <div className="mt-8">
         <h4 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h4>
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium text-gray-800">Web Development Project</p>
-                <p className="text-sm text-gray-500">Client: Tech Solutions Inc.</p>
+          {sellerOrders.length > 0 ? (
+            sellerOrders.slice(0, 5).map((order) => (
+              <div key={order.id} className="bg-white p-4 rounded-lg shadow-sm border">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-800">{order.title || `Order #${order.id.substring(0, 8)}`}</p>
+                    <p className="text-sm text-gray-500">
+                      Client: {order.buyer?.name || 'Unknown Client'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Price: ${order.price?.toFixed(2) || '0.00'}
+                    </p>
+                  </div>
+                  <span className={`px-3 py-1 ${
+                    order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                    order.status === 'in_progress' || order.status === 'active' ? 'bg-blue-100 text-blue-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  } rounded-full text-sm`}>
+                    {order.status === 'in_progress' ? 'In Progress' : 
+                     order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </span>
+                </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                Completed
-              </span>
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No orders found. Start selling to see your orders here.
             </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium text-gray-800">Mobile App Design</p>
-                <p className="text-sm text-gray-500">Client: Startup Innovations</p>
-              </div>
-              <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
-                In Progress
-              </span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
+  
   const FinancesView = () => (
     <div className="space-y-8 w-full">
       <h3 className="text-2xl font-semibold text-gray-800 mb-4">Financial Overview</h3>
