@@ -94,12 +94,13 @@ const Create_order = (props: Props) => {
   };
 
   return (
+    <div className="bg-[#f2f2f2] min-h-screen"> 
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Create a request</h1>
+      <h1 className="text-2xl text-black font-bold mb-6">Create a request</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="workTitle" className="block text-sm font-medium mb-2">
+          <label htmlFor="workTitle" className="block text-sm text-black font-medium mb-2">
             Work title:
           </label>
           <input
@@ -107,26 +108,26 @@ const Create_order = (props: Props) => {
             id="workTitle"
             value={formData.workTitle}
             onChange={(e) => setFormData({ ...formData, workTitle: e.target.value })}
-            className="w-full p-2 border rounded-md text-black"
+            className="w-full p-2 border border-[#0cb9c1]  rounded-md text-black"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-2">
+          <label htmlFor="description" className="block text-sm text-black font-medium mb-2">
             Description:
           </label>
           <textarea
             id="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full p-2 border rounded-md h-32 text-black"
+            className="w-full p-2 border border-[#0cb9c1]  rounded-md h-32 text-black"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="rate" className="block text-sm font-medium mb-2">
+          <label htmlFor="rate" className="block text-sm text-black font-medium mb-2">
             Rate:
           </label>
           <input
@@ -140,20 +141,20 @@ const Create_order = (props: Props) => {
             }}
             onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
             placeholder="50$/HR"
-            className="w-full p-2 border rounded-md text-black"
+            className="w-full p-2 border border-[#0cb9c1] rounded-md text-black"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="category" className="block text-sm font-medium mb-2">
+          <label htmlFor="category" className="block text-sm text-black font-medium mb-2">
             Category:
           </label>
           <select
             id="category"
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full p-2 border rounded-md text-black"
+            className="w-full p-2 border border-[#0cb9c1] rounded-md text-black"
             required
           >
             {categories.map((category) => (
@@ -166,11 +167,12 @@ const Create_order = (props: Props) => {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+          className="w-full bg-[#0cb9c1] text-white py-2 px-4 rounded-md hover:bg-[rgba(12,185,193,0.9)] transition-colors"
         >
           POST THE REQUEST
         </button>
       </form>
+    </div>
     </div>
   );
 };
