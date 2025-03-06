@@ -1,4 +1,4 @@
-// app/api/seller-orders/route.ts
+// app/api/add-order/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utilities/auth';
