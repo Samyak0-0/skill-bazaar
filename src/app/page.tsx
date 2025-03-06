@@ -36,7 +36,7 @@ export default function Home() {
           onClick={() => setShowCreateOrder(!showCreateOrder)}
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
         >
-          {showCreateOrder ? 'Back to Home' : 'Create Request'}
+          {showCreateOrder ? 'Back to Home' : 'Create Service'}
         </button>
       </div>
 
