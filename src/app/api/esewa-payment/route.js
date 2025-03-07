@@ -77,11 +77,11 @@ export async function GET(req) {
       },
     });
 
-    // Update the purchased item status to 'completed'
-    await prisma.purchasedOrder.update({
-      where: { id: paymentInfo.response.transaction_uuid },
-      data: { status: "COMPLETED" },
-    });
+    // // Update the purchased item status to 'completed'
+    // await prisma.purchasedOrder.update({
+    //   where: { id: paymentInfo.response.transaction_uuid },
+    //   data: { status: "COMPLETED" },
+    // });
 
     //notification - aakriti has added stuffs
     // Fetch the order details
@@ -91,11 +91,11 @@ export async function GET(req) {
       select: { workTitle: true, id: true }
     });
 
-     // Update the order status to PAID
-    //  await prisma.order.update({
-    //   where: { id: purchasedItemData.order.id },
-    //   data: { status: "PAID" },
-    // });
+    //  // Update the order status to PAID
+    // //  await prisma.order.update({
+    // //   where: { id: purchasedItemData.order.id },
+    // //   data: { status: "PAID" },
+    // // });
 
    // Create a notification for the seller that their product has been purchased
    await prisma.notification.create({

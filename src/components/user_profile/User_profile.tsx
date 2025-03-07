@@ -1,21 +1,46 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
-import {
-  Settings,
-  LogOut,
-  User,
-  Wallet,
-  MapPin,
-  Phone,
-  Camera,
-  Heart,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { LogOut, Camera, Trash2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { MessagingContext } from "@/provider/MessagingContext";
+
+// Define the Order interface
+interface Order {
+  id: string;
+  title?: string;
+  price?: number;
+  status: "pending" | "in_progress" | "active" | "completed" | "cancelled";
+  buyerId?: string;
+  sellerId?: string;
+  buyer?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  seller?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  Review?: any[];
+  createdAt?: Date;
+}
+
+interface Service {
+  id: string;
+  serviceId: string;
+  workTitle: string;
+  description: string;
+  rate: string;
+  category: string;
+  createdAt: string;
+  buyerId: string;
+  sellerId: string;
+  status: string;
+}
 
 interface UserData {
   name: string;
@@ -30,6 +55,7 @@ interface UserData {
     spendings: number;
     completedJobs: number;
   };
+  serviceList: Service[];
 }
 
 const UserProfile = () => {
@@ -38,7 +64,9 @@ const UserProfile = () => {
   const [newSkill, setNewSkill] = useState("");
   const [newInterest, setNewInterest] = useState("");
   const { data } = useSession();
-
+  const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [activeOrders, setActiveOrders] = useState(0);
 
   const [userData, setUserData] = useState<UserData>({
     name: "",
@@ -54,6 +82,7 @@ const UserProfile = () => {
       spendings: 0,
       completedJobs: 0,
     },
+    serviceList: [],
   });
 
   useEffect(() => {
@@ -86,6 +115,7 @@ const UserProfile = () => {
             spendings: apiData.totalSpending || 0.0,
             completedJobs: apiData.completedOrders || 0,
           },
+          serviceList: apiData.serviceList || [],
         }));
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -94,7 +124,6 @@ const UserProfile = () => {
 
     fetchUserData();
   }, [data?.user?.email]);
-  
 
   useEffect(() => {
     if (!data?.user?.email) return;
@@ -105,7 +134,39 @@ const UserProfile = () => {
       avatar: data.user.image || "",
       email: data.user.email || "",
     }));
+
+    // Call fetchOrders when the component mounts
+    fetchOrders();
   }, [data?.user?.email]);
+
+  // Updated fetchOrders function
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/add-order");
+
+      if (!response.ok) {
+        console.error("Failed to fetch seller orders:", response.statusText);
+        return;
+      }
+
+      const orders = await response.json();
+      setSellerOrders(orders);
+
+      // Count orders by status
+      const pending = orders.filter(
+        (order: Order) => order.status === "pending"
+      ).length;
+      const active = orders.filter(
+        (order: Order) =>
+          order.status === "in_progress" || order.status === "active"
+      ).length;
+
+      setPendingOrders(pending);
+      setActiveOrders(active);
+    } catch (error) {
+      console.error("Error fetching seller orders:", error);
+    }
+  };
 
   const handleAddSkill = async () => {
     if (!newSkill || !data?.user?.email) return;
@@ -163,10 +224,13 @@ const UserProfile = () => {
       console.error("Error adding interest:", error);
     }
   };
+
   const InterestsView = () => (
     <div className="space-y-8 w-full">
       <div className="flex flex-col space-y-4">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Interests</h3>
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+          My Interests
+        </h3>
         <div className="flex flex-wrap gap-3">
           {userData.interests.map((interest) => (
             <span
@@ -231,11 +295,13 @@ const UserProfile = () => {
 
   const OrdersView = () => (
     <div className="space-y-8 w-full">
-      <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Orders</h3>
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+        My Orders (Seller)
+      </h3>
       <div className="grid grid-cols-3 gap-6">
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Pending Orders</p>
-          <p className="text-3xl font-bold text-yellow-600">3</p>
+          <p className="text-3xl font-bold text-yellow-600">{pendingOrders}</p>
         </div>
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Completed Orders</p>
@@ -245,41 +311,65 @@ const UserProfile = () => {
         </div>
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Active Projects</p>
-          <p className="text-3xl font-bold text-blue-600">2</p>
+          <p className="text-3xl font-bold text-blue-600">{activeOrders}</p>
         </div>
       </div>
       <div className="mt-8">
-        <h4 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h4>
+        <h4 className="text-xl font-semibold text-gray-800 mb-4">
+          Recent Orders
+        </h4>
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium text-gray-800">Web Development Project</p>
-                <p className="text-sm text-gray-500">Client: Tech Solutions Inc.</p>
+          {sellerOrders.length > 0 ? (
+            sellerOrders.slice(0, 5).map((order) => (
+              <div
+                key={order.id}
+                className="bg-white p-4 rounded-lg shadow-sm border"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-800">
+                      {order.title || `Order #${order.id.substring(0, 8)}`}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Client: {order.buyer?.name || "Unknown Client"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Price: ${order.price?.toFixed(2) || "0.00"}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 ${
+                      order.status === "completed"
+                        ? "bg-green-100 text-green-700"
+                        : order.status === "in_progress" ||
+                          order.status === "active"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    } rounded-full text-sm`}
+                  >
+                    {order.status === "in_progress"
+                      ? "In Progress"
+                      : order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
+                  </span>
+                </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                Completed
-              </span>
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No orders found. Start selling to see your orders here.
             </div>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-medium text-gray-800">Mobile App Design</p>
-                <p className="text-sm text-gray-500">Client: Startup Innovations</p>
-              </div>
-              <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
-                In Progress
-              </span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
+
   const FinancesView = () => (
     <div className="space-y-8 w-full">
-      <h3 className="text-2xl font-semibold text-gray-800 mb-4">Financial Overview</h3>
+      <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+        Financial Overview
+      </h3>
       <div className="grid grid-cols-3 gap-6">
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Total Earnings</p>
@@ -296,18 +386,108 @@ const UserProfile = () => {
         <div className="p-6 bg-gray-100 rounded-xl text-center">
           <p className="text-base text-gray-600 mb-2">Net Profit</p>
           <p className="text-3xl font-bold text-green-600">
-            ${(userData.finances.earnings - userData.finances.spendings).toFixed(2)}
+            $
+            {(userData.finances.earnings - userData.finances.spendings).toFixed(
+              2
+            )}
           </p>
         </div>
       </div>
     </div>
   );
 
+  const ServiceView = () => {
+    const handleDeleteService = async (serviceId: string) => {
+      if (window.confirm("Are you sure you want to delete this service?")) {
+        try {
+          const response = await fetch(
+            `/api/interests?serviceId=${serviceId}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to delete order");
+          }
+
+          const result = await response.json();
+
+          // Update the local state to remove the deleted order
+          setUserData((prev) => ({
+            ...prev,
+            serviceList: prev.serviceList.filter(
+              (service) => service.id !== serviceId
+            ),
+          }));
+
+          console.log("Service deleted successfully:", result.deletedService);
+        } catch (error) {
+          console.error("Error deleting Service:", error);
+        }
+      }
+    };
+
+    return (
+      <div className="space-y-6">
+        <h3 className="text-xl font-medium mb-4 text-gray-800">
+          List of Services
+        </h3>
+        {userData.serviceList.length > 0 ? (
+          <div className="space-y-4">
+            {userData.serviceList.map((service) => (
+              <div
+                key={service.id}
+                className="p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between">
+                  <h4 className="font-semibold text-lg text-gray-900">
+                    {service.workTitle}
+                  </h4>
+                  <button
+                    onClick={() => handleDeleteService(service.id)}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                    aria-label="Delete service"
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
+
+                <p className="text-sm text-gray-600">{service.description}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-sm text-gray-500">
+                    {service.category}
+                  </span>
+                  <span className="text-sm font-medium text-green-600">
+                    {service.rate}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-sm text-gray-500">
+                    Created:{" "}
+                    {new Date(service.createdAt).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric", // Use "numeric" for 4-digit year
+                    })}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 text-center text-gray-500">No Service Posted</div>
+        )}
+      </div>
+    );
+  };
+
   const tabs = [
     { id: "interests", label: "Interests", component: InterestsView },
     { id: "skills", label: "Skills", component: SkillsView },
     { id: "orders", label: "Orders", component: OrdersView },
     { id: "finances", label: "Finances", component: FinancesView },
+    { id: "services", label: "Services", component: ServiceView },
   ];
 
   return (
@@ -328,11 +508,13 @@ const UserProfile = () => {
                 </button>
               </div>
               <div>
-                <h2 className="text-4xl font-bold text-gray-800 mb-2">{userData.name}</h2>
+                <h2 className="text-4xl font-bold text-gray-800 mb-2">
+                  {userData.name}
+                </h2>
                 <p className="text-xl text-gray-600">{userData.email}</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => signOut()}
               className="text-gray-500 hover:text-gray-700"
             >
@@ -346,8 +528,8 @@ const UserProfile = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-8 py-4 rounded-full text-base font-semibold transition-all duration-300 ${
-                  activeTab === tab.id 
-                    ? "bg-teal-500 text-white shadow-md" 
+                  activeTab === tab.id
+                    ? "bg-teal-500 text-white shadow-md"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >

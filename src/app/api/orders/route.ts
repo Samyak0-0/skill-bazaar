@@ -118,7 +118,7 @@ export async function POST(req: Request) {
         rate,
         category,
         serviceId,
-        buyerId: currentUser.id,
+        // buyerId: currentUser.id,
         sellerId: sellerId,
         status,
       },

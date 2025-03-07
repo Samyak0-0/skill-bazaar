@@ -163,12 +163,12 @@ const Home_page = () => {
                 {renderRatingStars(order.averageRating || 0)}
               </div> 
               
-              <h3 className="font-medium text-lg font-semibold mb-4 text-black">Work: {order.workTitle}</h3>
+              <h3 className="font-medium text-lg mb-4 text-black">Work: {order.workTitle}</h3>
               <p className="font-medium text-black mb-3 line-clamp-2">Description: {truncateDescription(order.description)}</p>
              <p className="font-medium text-black mb-3">Category: {order.category}</p>
              
              <div className="absolute bottom-5 right-3 flex flex-col items-end">
-              <span className="font-medium text-lg font-semibold text-black mb-3"> {order.rate}</span>
+              <span className="font-medium text-lg text-black mb-3"> {order.rate}</span>
               
               {/* <p className="font-medium text-black mb-3">Rating: {renderRatingStars(order.averageRating || 0)}</p> */}
             </div>

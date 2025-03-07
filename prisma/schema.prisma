@@ -126,7 +126,7 @@ model PurchasedOrder {
   purchaseDate DateTime @default(now())
   status       String   @default("pending")
 
-  order   Order     @relation("OrderPurchasedOrders", fields: [orderId], references: [id])
+  order   Order     @relation("OrderPurchasedOrders", fields: [orderId], references: [id], onDelete: Cascade)
   payment Payment[] @relation("OrderPayment")
 }
 
@@ -143,7 +143,7 @@ model Payment {
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt
 
-  purchasedOrder PurchasedOrder @relation("OrderPayment", fields: [productId], references: [id])
+  purchasedOrder PurchasedOrder @relation("OrderPayment", fields: [productId], references: [id], onDelete: Cascade)
 }
 
 enum PaymentGateway {
@@ -178,7 +178,7 @@ model Notification {
   updatedAt DateTime @default(now()) @map("updatedAt")
  
 
-  order Order? @relation("OrderNotifications", fields: [orderId], references: [id])
+  order Order? @relation("OrderNotifications", fields: [orderId], references: [id], onDelete: Cascade)
   user  User   @relation("UserNotifications", fields: [userId], references: [id])
 
   @@index([userId])
