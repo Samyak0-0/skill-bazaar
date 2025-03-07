@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { OrderCardProps, Review } from "./type";
+import { OrderCardProps, Review, OrderType } from "./type";
 import ReviewModal from "./ReviewModal";
 
 const getStatusColor = (status: string) => {
@@ -23,7 +23,7 @@ export default function OrderCard({
   date, 
   reviews: initialReviewCount, 
   orderId,
-  type = 'bought' // Default type parameter (either 'bought' or 'sold')
+  type = 'bought' // Default type parameter
 }: OrderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
@@ -35,7 +35,9 @@ export default function OrderCard({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const statusColor = getStatusColor(currentStatus);
   
-  // Determine if status can be changed (only for sellers and when not already completed)
+  // Determine if status can be changed
+  // For sold orders: seller can change when not completed
+  // For bought orders: buyer cannot change status (can be modified if needed)
   const canChangeStatus = type === 'sold' && currentStatus.toUpperCase() !== 'COMPLETED';
   
   // Get the next status based on current status
@@ -60,8 +62,8 @@ export default function OrderCard({
     setError(null);
     
     try {
-      // CORRECTED: Remove 'sold/' from the URL path to match the API route structure
-      const response = await fetch(`/api/orders/sold/${orderId}/status`, {
+      // Updated to use the correct endpoint structure based on order type
+      const response = await fetch(`/api/orders/${type}/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +78,17 @@ export default function OrderCard({
       }
       
       const updatedOrder = await response.json();
-      setCurrentStatus(updatedOrder.status);
+      
+      // For 'bought' orders, we need to check if the response has the status field
+      // in the right place, as the data structure might be different
+      if (type as OrderType === 'bought' && 'status' in updatedOrder) {
+        setCurrentStatus(updatedOrder.status);
+      } else if (type === 'sold' && 'status' in updatedOrder) {
+        setCurrentStatus(updatedOrder.status);
+      } else {
+        console.error('Unexpected response structure:', updatedOrder);
+        throw new Error('Unexpected response format');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
       console.error('Error updating status:', err);
@@ -90,7 +102,6 @@ export default function OrderCard({
     setError(null);
 
     try {
-      // Keep this URL as is since it's a different API endpoint
       const response = await fetch(`/api/orders/${type}/${orderId}/reviews`);
       
       if (!response.ok) {

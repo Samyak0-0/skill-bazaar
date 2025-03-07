@@ -1,26 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-
-// Update the Review interface to include the reviewer property
-interface Reviewer {
-  name: string | null;
-}
-
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  createdAt: Date;
-  reviewer: Reviewer;
-  [key: string]: any; // Allow for additional properties
-}
+import { Review, OrderType } from './type';
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   reviews: Review[];
   orderId: string;
-  type: string; // Type parameter for API endpoint
+  type: OrderType; // Use the OrderType from the types file
   onReviewAdded?: (review: Review) => void;
 }
 
@@ -75,7 +62,7 @@ export default function ReviewModal({
         throw new Error(errorData.error || 'Failed to submit review');
       }
 
-      const newReview = await response.json();
+      const newReview: Review = await response.json();
       if (onReviewAdded) {
         onReviewAdded(newReview);
       }
