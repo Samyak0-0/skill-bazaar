@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Review } from './type';
+
+// Update the Review interface to include the reviewer property
+interface Reviewer {
+  name: string | null;
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: Date;
+  reviewer: Reviewer;
+  [key: string]: any; // Allow for additional properties
+}
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -44,6 +57,7 @@ export default function ReviewModal({
     setError(null);
 
     try {
+      // Fixed API endpoint to match the route definition (/review instead of /reviews)
       const response = await fetch(`/api/orders/${type}/${orderId}/reviews`, {
         method: 'POST',
         headers: {
@@ -124,7 +138,7 @@ export default function ReviewModal({
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:ring focus:ring-[#b1e6e6] focus:border-[#b1e6e6] transition-all"
+                  className="w-full p-3 border rounded-lg focus:ring focus:ring-[#b1e6e6] focus:border-[#b1e6e6] text-black transition-all"
                   rows={3}
                   placeholder="Share your experience..."
                   required

@@ -122,18 +122,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify the user is actually the buyer for this order
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      select: { buyerId: true }
+    // Verify the user is actually the buyer for this order by checking purchasedOrders
+    const purchasedOrder = await prisma.purchasedOrder.findFirst({
+      where: { 
+        orderId: orderId,
+        buyerId: userId
+      },
     });
 
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-    }
-
-    // Check if the current user is the buyer
-    if (order.buyerId !== userId) {
+    if (!purchasedOrder) {
       return NextResponse.json(
         { error: 'Only the buyer can submit a review for this order' }, 
         { status: 403 }
