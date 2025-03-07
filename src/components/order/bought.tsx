@@ -1,12 +1,18 @@
-// app/orders/bought.tsx
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import OrderCard from "./ordercard";
 import { Order } from "./type";
 
+// Extended type to include purchasedOrder specific fields
+interface ExtendedOrder extends Order {
+  purchaseDate?: Date | string;
+  purchasedOrderId?: string;
+  purchasedOrderStatus?: string;
+}
+
 export default function Bought() {
   const { data: session, status: sessionStatus } = useSession();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<ExtendedOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -53,18 +59,26 @@ export default function Bought() {
         setDebugInfo({
           rawCount: data.length,
           sessionUserId: session?.user?.id,
-          rawData: data.length > 0 ? data[0] : null
+          rawData: data.length > 0 ? data[0] : null,
+          purchasedOrdersCount: data.length > 0 && data[0].purchasedOrders ? data[0].purchasedOrders.length : 0
         });
         
-        // Make sure we only show orders where we are the buyer and there's a seller
-        // For bought orders, we are the buyer
-        const validOrders = data.filter((order: Order) => 
-          order.sellerId && 
-          order.seller
-        );
+        // Create a Map to deduplicate orders by ID - using purchasedOrderId when available
+        const uniqueOrdersMap = new Map();
+        data.forEach((order: ExtendedOrder) => {
+          // Only add orders that have a seller
+          if (order.sellerId && order.seller) {
+            const uniqueId = order.purchasedOrderId ? `${order.id}-${order.purchasedOrderId}` : order.id;
+            uniqueOrdersMap.set(uniqueId, order);
+          }
+        });
         
+        // Convert Map back to array
+        const validOrders = Array.from(uniqueOrdersMap.values());
+        
+        console.log(`Found ${validOrders.length} valid unique orders from ${data.length} total orders`);
         if (validOrders.length < data.length) {
-          console.warn(`Filtered out ${data.length - validOrders.length} invalid bought orders`);
+          console.warn(`Filtered out ${data.length - validOrders.length} invalid or duplicate bought orders`);
         }
         
         setOrders(validOrders);
@@ -120,13 +134,14 @@ export default function Bought() {
           <p className="text-gray-500">No orders found</p>
           {process.env.NODE_ENV !== 'production' && debugInfo && (
             <div className="mt-2 p-2 border border-dashed border-gray-300 text-xs text-left max-w-md mx-auto bg-gray-50 rounded">
-             <p>Debug Info:</p>
-             <p>- User ID: {debugInfo.sessionUserId || 'Not found'}</p>
+              <p>Debug Info:</p>
+              <p>- User ID: {debugInfo.sessionUserId || 'Not found'}</p>
               <p>- Raw orders count: {debugInfo.rawCount}</p>
               <p>- API returned data: {debugInfo.rawCount > 0 ? 'Yes' : 'No'}</p>
+              <p>- Purchased orders count: {debugInfo.purchasedOrdersCount}</p>
               {debugInfo.rawData && (
                 <details>
-                 <summary className="cursor-pointer">Show first order data</summary>
+                  <summary className="cursor-pointer">Show first order data</summary>
                   <pre className="mt-2 overflow-auto max-h-40 bg-gray-100 p-2 rounded">
                     {JSON.stringify(debugInfo.rawData, null, 2)}
                   </pre>
@@ -139,17 +154,21 @@ export default function Bought() {
 
       {!loading && !error && orders.length > 0 && (
         <div className="space-y-4">
-          {orders.map((order: Order) => (
+          {orders.map((order: ExtendedOrder) => (
             <OrderCard
-              key={order.id}
-              username={order.seller?.name || 'Unknown Seller'} // Ensure we display the seller's name
+              key={`${order.id}-${order.purchasedOrderId || ''}`}
+              username={order.seller?.name || 'Unknown Seller'}
               category={order.category || 'Unknown Category'}
               work={order.workTitle || 'Untitled Work'}
-              status={order.status}
-              date={new Date(order.createdAt).toLocaleDateString()}
+              status={order.purchasedOrderStatus || 'PENDING'}
+              date={order.purchaseDate ? 
+                new Date(order.purchaseDate).toLocaleDateString() :
+                new Date(order.createdAt).toLocaleDateString()}
               reviews={order.Review?.length || 0}
               orderId={order.id}
-              type="bought" // Explicitly set type as "bought"
+              type="bought"
+              isPurchased={true}
+              purchasedOrderId={order.purchasedOrderId}
             />
           ))}
         </div>

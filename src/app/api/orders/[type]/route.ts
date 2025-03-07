@@ -3,6 +3,49 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/utilities/auth';
 import { prisma } from '@/utilities/prisma';
+import { Prisma } from '@prisma/client';
+
+// Define proper types that match your Prisma schema
+type UserInfo = {
+  id: string;
+  name: string | null;
+  email: string | null;
+};
+
+// Define the structure that matches the Prisma query result shapes
+type OrderWithRelations = Prisma.OrderGetPayload<{
+  include: {
+    seller: { select: { id: true, name: true, email: true } };
+    buyer: { select: { id: true, name: true, email: true } };
+    Review: true;
+    purchasedOrders: {
+      include: {
+        payment: true;
+      }
+    };
+  }
+}>;
+
+// Define the transformed purchased order structure
+interface TransformedPurchasedOrder {
+  id: string;
+  serviceId: string | null;
+  workTitle: string | null;
+  description: string | null;
+  rate: string | null;
+  category: string | null;
+  createdAt: Date;
+  buyerId: string | null;
+  sellerId: string | null;
+  status: string;
+  Review: any[];
+  purchaseDate: Date;
+  purchasedOrderId: string;
+  purchasedOrderStatus: string;
+  payment: any[];
+  buyer?: UserInfo | null;
+  seller?: UserInfo | null;
+}
 
 // Get authenticated user ID with better error tracking
 async function getUserId() {
@@ -92,74 +135,163 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     console.log(`Status filter: ${status || 'none'}`);
 
-    // Build the where condition based on order type
-    let whereCondition: any = {};
-    
-    // This ensures we're looking at the right type of orders (sold by me or bought by me)
+    // Different query strategies based on order type
     if (orderType === 'sold') {
-      whereCondition.sellerId = userId;
-      // For sold orders, we want to ensure there's a buyer
-      whereCondition.buyerId = { not: null };
+      // For 'sold' orders, find orders where the current user is the seller
+      const whereCondition: Prisma.OrderWhereInput = {
+        sellerId: userId,
+      };
+      
+      // Add status filter if provided 
+      if (status && status !== 'all') {
+        whereCondition.status = status;
+      }
+      
+      console.log('Database query condition for sold orders:', JSON.stringify(whereCondition, null, 2));
+      
+      const orders = await prisma.order.findMany({
+        where: whereCondition,
+        include: {
+          seller: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          buyer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          Review: true,
+          purchasedOrders: {
+            include: {
+              payment: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      
+      console.log(`Fetched ${orders.length} sold orders for user ${userId}`);
+      
+      // Log the structure of the first order to debug
+      if (orders.length > 0) {
+        console.log('First order structure:', JSON.stringify({
+          id: orders[0].id,
+          hasBuyer: !!orders[0].buyer,
+          purchasedOrdersCount: orders[0].purchasedOrders.length,
+        }, null, 2));
+      }
+
+      // Add buyer information to each purchasedOrder where needed
+      const enhancedOrders = await Promise.all(orders.map(async (order) => {
+        const enhancedPurchasedOrders = await Promise.all(order.purchasedOrders.map(async (po) => {
+          if (po.buyerId) {
+            const buyer = await prisma.user.findUnique({
+              where: { id: po.buyerId },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              }
+            });
+            
+            return {
+              ...po,
+              buyer: buyer
+            };
+          }
+          return po;
+        }));
+        
+        return {
+          ...order,
+          purchasedOrders: enhancedPurchasedOrders
+        };
+      }));
+
+      return NextResponse.json(enhancedOrders);
+      
     } else {
-      whereCondition.buyerId = userId;
-      // For bought orders, we want to ensure there's a seller
-      whereCondition.sellerId = { not: null };
-    }
-    
-    // Add status filter if provided
-    if (status && status !== 'all') {
-      whereCondition.status = status;
-    }
-    
-    console.log('Database query condition:', JSON.stringify(whereCondition, null, 2));
-    
-    // First, check if any orders exist with this seller/buyer ID
-    const totalOrdersCount = await prisma.order.count({
-      where: {
-        [orderType === 'sold' ? 'sellerId' : 'buyerId']: userId,
+      // For 'bought' orders approach: fetch directly from PurchasedOrder
+      // where the user is the buyer
+      
+      // First, check if we need to filter by Order.status
+      let orderWhereInput: Prisma.OrderWhereInput | undefined = undefined;
+      if (status && status !== 'all') {
+        orderWhereInput = {
+          status: status,
+        };
       }
-    });
-    
-    console.log(`Total ${orderType} orders for user ${userId} (without filters): ${totalOrdersCount}`);
-    
-    // Now perform the actual query with all filters
-    const orders = await prisma.order.findMany({
-      where: whereCondition,
-      include: {
-        buyer: {
-          select: {
-            id: true,
-            name: true,
-            email: true, // Include email for better debugging
-          },
+      
+      const purchasedOrders = await prisma.purchasedOrder.findMany({
+        where: {
+          buyerId: userId,
+          // We can't filter PurchasedOrder by Order.status directly,
+          // so we'll filter in the include if needed
+          order: orderWhereInput,
         },
-        seller: {
-          select: {
-            id: true,
-            name: true,
-            email: true, // Include email for better debugging
+        include: {
+          order: {
+            include: {
+              seller: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+              buyer: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+              Review: true,
+            },
           },
+          payment: true,
         },
-        Review: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    // Log the count and first item for debugging
-    console.log(`Fetched ${orders.length} ${orderType} orders for user ${userId}`);
-    if (orders.length > 0) {
-      console.log('First order sample:', JSON.stringify({
-        id: orders[0].id,
-        buyerId: orders[0].buyerId,
-        sellerId: orders[0].sellerId,
-        buyerName: orders[0].buyer?.name,
-        sellerName: orders[0].seller?.name,
-      }, null, 2));
+        orderBy: {
+          purchaseDate: 'desc'
+        }
+      });
+      
+      console.log(`Fetched ${purchasedOrders.length} purchased orders for user ${userId}`);
+      
+      // Transform the data to match the expected format in the frontend
+      const transformedOrders = purchasedOrders.map(po => {
+        if (!po.order) {
+          console.error(`Missing order data for purchased order ${po.id}`);
+          return null;
+        }
+        
+        // Create a transformed order object that satisfies the TypeScript type
+        const transformedOrder: TransformedPurchasedOrder = {
+          ...po.order,
+          purchaseDate: po.purchaseDate,
+          purchasedOrderId: po.id,
+          purchasedOrderStatus: po.status,
+          payment: po.payment,
+          // Use direct inclusion where buyer data might exist
+          buyer: po.order.buyer,
+          seller: po.order.seller,
+          Review: po.order.Review,
+        };
+        
+        return transformedOrder;
+      }).filter((order): order is TransformedPurchasedOrder => order !== null);
+      
+      console.log(`Transformed ${transformedOrders.length} bought orders for user ${userId}`);
+      return NextResponse.json(transformedOrders);
     }
-
-    return NextResponse.json(orders);
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
