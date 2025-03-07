@@ -92,17 +92,17 @@ export async function GET(req) {
     });
 
      // Update the order status to PAID
-     await prisma.order.update({
-      where: { id: purchasedItemData.order.id },
-      data: { status: "PAID" },
-    });
+    //  await prisma.order.update({
+    //   where: { id: purchasedItemData.order.id },
+    //   data: { status: "PAID" },
+    // });
 
    // Create a notification for the seller that their product has been purchased
    await prisma.notification.create({
     data: {
-      type: "Order Purchased",
+      type: "ORDER_PURCHASED",
       message: `${buyer?.name || "A customer"} has purchased your service "${orderData?.workTitle}". Check your orders for more information.`,
-      userId: sellerId,
+      userId: sellerId, // Specifically target the seller
       orderId: purchasedItemData.order.id,
       read: false
     }

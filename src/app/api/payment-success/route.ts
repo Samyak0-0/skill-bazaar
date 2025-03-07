@@ -68,14 +68,14 @@ export async function POST(req: Request) {
   }
 
  // Update the order status to PAID
-    const updatedOrder = await prisma.order.update({
-      where: {
-        id: itemId,
-      },
-      data: {
-        status: "PAID",
-      },
-    });
+    // const updatedOrder = await prisma.order.update({
+    //   where: {
+    //     id: itemId,
+    //   },
+    //   data: {
+    //     status: "PAID",
+    //   },
+    // });
 
 
     return NextResponse.json({ 
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       message: "Payment processed successfully and seller has been notified" 
     });
   } catch (error) {
-    console.error("Error processing payment success:", error);
+    console.error("Error processing payment ssuccess:", error);
     return NextResponse.json(
       { error: "Failed to process payment success" },
       { status: 500 }
