@@ -34,7 +34,7 @@ export default function Home() {
       <div className="absolute top-6 right-20 z-10 pr-6">
         <button 
           onClick={() => setShowCreateOrder(!showCreateOrder)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+          className="bg-[#0cb9c1] text-white px-4 py-2 rounded-md"
         >
           {showCreateOrder ? 'Back to Home' : 'Create Service'}
         </button>

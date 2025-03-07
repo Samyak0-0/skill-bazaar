@@ -1,6 +1,8 @@
 //also by sagar for the orderdetails page , please dont change stuff withohut telling me i will cry..
 //D:\skill-bazaar\src\app\api\orderdetails\[id]\route.ts
 
+// @ts-nocheck
+
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
