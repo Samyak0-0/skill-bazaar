@@ -84,48 +84,54 @@ export default function Sold() {
         });
         
         // Expand orders with purchasedOrders to create individual entries for each purchase
+        // ONLY including those with a valid buyerId
         const expandedOrders: ExtendedOrder[] = [];
         
         data.forEach((order: ExtendedOrder) => {
           if (order.purchasedOrders && order.purchasedOrders.length > 0) {
-            // For each purchasedOrder, create a separate entry
-            order.purchasedOrders.forEach(po => {
-              // Use the buyer information directly from the purchasedOrder
-              expandedOrders.push({
-                ...order,
-                purchasedOrderId: po.id,
-                purchasedOrderStatus: po.status,
-                purchaseDate: po.purchaseDate,
-                // Use the buyer information from the purchasedOrder
-                buyer: po.buyer,
-                buyerInfo: {
-                  id: po.buyerId || 'unknown',
-                  name: po.buyer?.name || null,
-                  email: po.buyer?.email || null
-                }
-              });
-              
-              // Debug this specific entry
-              console.log(`Order entry for purchase ${po.id}:`, {
-                buyerId: po.buyerId,
-                buyerName: po.buyer?.name || 'null',
-                buyerEmail: po.buyer?.email || 'null'
-              });
-            });
-          } else {
-            // For orders without purchasedOrders, include them with empty buyer info
-            expandedOrders.push({
-              ...order,
-              buyerInfo: {
-                id: 'no-purchaser', 
-                name: null,
-                email: null
+            // Filter to only include purchasedOrders that have a valid buyerId
+            const validPurchasedOrders = order.purchasedOrders.filter(po => 
+              po.buyerId && po.buyerId !== null && po.buyerId !== undefined && po.buyerId !== ''
+            );
+            
+            // For each valid purchasedOrder, create a separate entry
+            validPurchasedOrders.forEach(po => {
+              // Verify the buyer information exists
+              if (po.buyerId) {
+                expandedOrders.push({
+                  ...order,
+                  purchasedOrderId: po.id,
+                  purchasedOrderStatus: po.status,
+                  purchaseDate: po.purchaseDate,
+                  // Use the buyer information from the purchasedOrder
+                  buyer: po.buyer,
+                  buyerInfo: {
+                    id: po.buyerId,
+                    name: po.buyer?.name || null,
+                    email: po.buyer?.email || null
+                  }
+                });
+                
+                // Debug this specific entry
+                console.log(`Valid order entry for purchase ${po.id}:`, {
+                  buyerId: po.buyerId,
+                  buyerName: po.buyer?.name || 'null',
+                  buyerEmail: po.buyer?.email || 'null'
+                });
+              } else {
+                console.log(`Skipping order entry for purchase ${po.id} due to missing buyerId`);
               }
             });
+            
+            // Log any filtered out entries
+            if (validPurchasedOrders.length < order.purchasedOrders.length) {
+              console.log(`Filtered out ${order.purchasedOrders.length - validPurchasedOrders.length} purchasedOrders without valid buyerId`);
+            }
           }
+          // We no longer include orders without purchasedOrders since they don't have buyers
         });
         
-        console.log(`Expanded to ${expandedOrders.length} individual sold order entries`);
+        console.log(`Expanded to ${expandedOrders.length} valid individual sold order entries`);
         setOrders(expandedOrders);
         setError(null);
       } catch (err) {
@@ -184,6 +190,7 @@ export default function Sold() {
               <p>- Raw orders count: {debugInfo.rawCount}</p>
               <p>- API returned data: {debugInfo.rawCount > 0 ? 'Yes' : 'No'}</p>
               <p>- Purchased orders count: {debugInfo.purchasedOrdersCount}</p>
+              <p>- Valid orders displayed: {orders.length}</p>
               {debugInfo.rawData && (
                 <details>
                   <summary className="cursor-pointer">Show first order data</summary>
