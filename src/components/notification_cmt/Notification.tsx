@@ -151,8 +151,10 @@ function Notification() {
   // Loading state
   if (loading) {
     return (
+      <div className="bg-[#f2f2f2] min-h-screen"> 
       <div className="flex items-center justify-center h-64">
         <Loader2 className="animate-spin w-8 h-8 text-blue-500" />
+      </div>
       </div>
     );
   }
