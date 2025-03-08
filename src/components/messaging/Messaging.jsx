@@ -186,7 +186,7 @@ export default function Messaging() {
       style={{
         margin: "0 auto",
         color: "#000000",
-        backgroundColor: "lightblue",
+        backgroundColor: "#f3f4f7",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -212,7 +212,7 @@ export default function Messaging() {
                   {msg.text && (
                     <div
                       className={`${
-                        msg.senderId === userId ? "bg-blue-500" : "bg-slate-500"
+                        msg.senderId === userId ? "bg-[#0cb9c1]" : "bg-[#a6a7a9]"
                       } rounded-md px-5 py-2 text-white text-xl`}
                     >
                       {msg.text}

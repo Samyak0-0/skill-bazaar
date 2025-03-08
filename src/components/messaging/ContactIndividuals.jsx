@@ -12,7 +12,7 @@ const ContactIndividuals = ({
     <div
       className={
         "  flex items-center cursor-pointer relative" +
-        (userId === selectedContact ? " bg-neutral-600" : "")
+        (userId === selectedContact ? " bg-[#0cb9c1]" : "")
       }
       key={userId}
     >

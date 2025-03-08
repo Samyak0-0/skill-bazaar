@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import ContactIndividuals from "./ContactIndividuals";
 import { signOut, useSession } from "next-auth/react";
 import { useContext } from "react";
+import { LogOut } from "lucide-react";
 import { MessagingContext } from "@/provider/MessagingContext";
 
 const ContactSection = () => {
@@ -43,7 +44,7 @@ const ContactSection = () => {
   }, [session]);
 
   return (
-    <div className=" text-white bg-gray-700 w-1/3 max-w-[300px] min-w-[225px] ">
+    <div className=" text-[#231b13] bg-[#b7e5e9] w-1/3 max-w-[300px] min-w-[225px] ">
       <div className=" text-3xl mt-3 mb-4 ml-3">Contacts</div>
       <div className="">
         {contacts?.map((indiv) => {
@@ -63,9 +64,10 @@ const ContactSection = () => {
         })}
       </div>
       <div
-        className="bg-red-500 text-white px-4 py-2 rounded-lg cursor-pointer shadow-md text-center w-fit mx-auto my-5"
+        className="bg-[#0cb9c1] flex justify-between text-white px-4 py-2 rounded-lg cursor-pointer shadow-md text-center w-fit mx-auto my-5"
         onClick={signOut}
       >
+        <LogOut className="" />
         Log Out
       </div>
     </div>
