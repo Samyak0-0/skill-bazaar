@@ -17,6 +17,9 @@ export default function Bought() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [debugInfo, setDebugInfo] = useState<any>(null);
+  
+  // Separate filteredOrders state to avoid refetching from API when filter changes
+  const [filteredOrders, setFilteredOrders] = useState<ExtendedOrder[]>([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -36,10 +39,8 @@ export default function Bought() {
           userId: session?.user?.id,
         });
         
-        const queryParams = statusFilter !== 'all' ? `?status=${statusFilter}` : '';
-        
-        // Use correct API path with type parameter
-        const response = await fetch(`/api/orders/bought${queryParams}`, {
+        // Remove status filter from API call - we'll filter client-side
+        const response = await fetch(`/api/orders/bought`, {
           credentials: 'include',
           headers: {
             'Cache-Control': 'no-cache',  // Prevent caching issues
@@ -92,7 +93,19 @@ export default function Bought() {
     };
 
     fetchOrders();
-  }, [sessionStatus, statusFilter, session?.user?.id]);
+  }, [sessionStatus, session?.user?.id]); // Remove statusFilter from dependencies
+
+  // Apply status filter client-side when orders or statusFilter changes
+  useEffect(() => {
+    if (statusFilter === 'all') {
+      setFilteredOrders(orders);
+    } else {
+      const filtered = orders.filter(order => 
+        (order.purchasedOrderStatus || order.status) === statusFilter
+      );
+      setFilteredOrders(filtered);
+    }
+  }, [orders, statusFilter]);
 
   const statuses = ['all', 'PENDING', 'IN PROGRESS', 'COMPLETED'];
 
@@ -126,17 +139,24 @@ export default function Bought() {
         </div>
       )}
 
-      {!loading && !error && orders.length === 0 && (
+      {!loading && !error && filteredOrders.length === 0 && (
         <div className="text-center py-12">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto w-16 h-16 text-[rgba(12,185,193,0.3)] mb-4">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p className="text-gray-500">No orders found</p>
+          <p className="text-gray-500">
+            {orders.length > 0 
+              ? `No ${statusFilter !== 'all' ? statusFilter.toLowerCase() : ''} orders found`
+              : "No orders found"}
+          </p>
           {process.env.NODE_ENV !== 'production' && debugInfo && (
             <div className="mt-2 p-2 border border-dashed border-gray-300 text-xs text-left max-w-md mx-auto bg-gray-50 rounded">
               <p>Debug Info:</p>
               <p>- User ID: {debugInfo.sessionUserId || 'Not found'}</p>
               <p>- Raw orders count: {debugInfo.rawCount}</p>
+              <p>- Total valid orders: {orders.length}</p>
+              <p>- Filtered orders: {filteredOrders.length}</p>
+              <p>- Current filter: {statusFilter}</p>
               <p>- API returned data: {debugInfo.rawCount > 0 ? 'Yes' : 'No'}</p>
               <p>- Purchased orders count: {debugInfo.purchasedOrdersCount}</p>
               {debugInfo.rawData && (
@@ -152,9 +172,9 @@ export default function Bought() {
         </div>
       )}
 
-      {!loading && !error && orders.length > 0 && (
+      {!loading && !error && filteredOrders.length > 0 && (
         <div className="space-y-4">
-          {orders.map((order: ExtendedOrder) => (
+          {filteredOrders.map((order: ExtendedOrder) => (
             <OrderCard
               key={`${order.id}-${order.purchasedOrderId || ''}`}
               username={order.seller?.name || 'Unknown Seller'}
