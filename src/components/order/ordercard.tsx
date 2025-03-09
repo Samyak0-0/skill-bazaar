@@ -23,7 +23,8 @@ export default function OrderCard({
   date, 
   reviews: initialReviewCount, 
   orderId,
-  type = 'bought' // Default type parameter
+  type = 'bought', // Default type parameter
+  purchasedOrderId // Add this new prop
 }: OrderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
@@ -62,14 +63,17 @@ export default function OrderCard({
     setError(null);
     
     try {
-      // Updated to use the correct endpoint structure based on order type
+      // Updated to include purchasedOrderId in the request body
       const response = await fetch(`/api/orders/${type}/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify({ 
+          status: nextStatus,
+          purchasedOrderId: purchasedOrderId // Include the purchasedOrderId in the request
+        }),
       });
       
       if (!response.ok) {
@@ -79,11 +83,11 @@ export default function OrderCard({
       
       const updatedOrder = await response.json();
       
-      // For 'bought' orders, we need to check if the response has the status field
-      // in the right place, as the data structure might be different
-      if (type as OrderType === 'bought' && 'status' in updatedOrder) {
-        setCurrentStatus(updatedOrder.status);
-      } else if (type === 'sold' && 'status' in updatedOrder) {
+      // Update the UI with the new status
+      // Check for purchasedOrderStatus which is in our transformed response
+      if (updatedOrder.purchasedOrderStatus) {
+        setCurrentStatus(updatedOrder.purchasedOrderStatus);
+      } else if ('status' in updatedOrder) {
         setCurrentStatus(updatedOrder.status);
       } else {
         console.error('Unexpected response structure:', updatedOrder);
@@ -102,7 +106,13 @@ export default function OrderCard({
     setError(null);
 
     try {
-      const response = await fetch(`/api/orders/${type}/${orderId}/reviews`);
+      // Updated to include purchasedOrderId if available
+      let url = `/api/orders/${type}/${orderId}/reviews`;
+      if (purchasedOrderId) {
+        url += `?purchasedOrderId=${purchasedOrderId}`;
+      }
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -208,6 +218,7 @@ export default function OrderCard({
         orderId={orderId}
         type={type}
         onReviewAdded={handleReviewAdded}
+        purchasedOrderId={purchasedOrderId} // Pass this to ReviewModal as well
       />
     </>
   );

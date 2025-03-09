@@ -7,6 +7,7 @@ interface ReviewModalProps {
   onClose: () => void;
   reviews: Review[];
   orderId: string;
+  purchasedOrderId?: string; // Add purchasedOrderId prop
   type: OrderType; // Use the OrderType from the types file
   onReviewAdded?: (review: Review) => void;
 }
