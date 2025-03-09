@@ -5,13 +5,13 @@ import ReviewModal from "./ReviewModal";
 const getStatusColor = (status: string) => {
   switch (status.toUpperCase()) {
     case 'COMPLETED':
-      return 'bg-teal-100 text-teal-800';
+      return 'bg-[#0cb9c1] text-white';
     case 'IN PROGRESS':
-      return 'bg-cyan-100 text-cyan-800';
+      return 'bg-[rgba(12,185,193,0.7)] text-white';
     case 'PENDING':
-      return 'bg-amber-100 text-amber-800';
+      return 'bg-[#f2f2f2] text-gray-700';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-[#f2f2f2] text-gray-700';
   }
 };
 
@@ -144,22 +144,38 @@ export default function OrderCard({
   // Set button text based on user type
   const reviewButtonText = type === 'bought' ? 'Review & View' : 'View Reviews';
 
+  // Determine card border color based on status
+  const getCardBorderColor = () => {
+    switch (currentStatus.toUpperCase()) {
+      case 'COMPLETED':
+        return 'border-[#0cb9c1] border-opacity-30';
+      case 'IN PROGRESS':
+        return 'border-[#0cb9c1] border-opacity-20';
+      case 'PENDING':
+        return 'border-[#f2f2f2]';
+      default:
+        return 'border-[#f2f2f2]';
+    }
+  };
+  
+  const cardBorderColor = getCardBorderColor();
+
   return (
     <>
       <div
-        className={`bg-teal-50 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden p-5
+        className={`bg-white border ${cardBorderColor} rounded-xl shadow-sm hover:shadow-md transition duration-200 overflow-hidden p-5
           ${isHovered ? 'transform scale-[1.01]' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="flex justify-between items-center">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-600 font-semibold text-lg">
+            <div className="w-12 h-12 bg-[rgba(12,185,193,0.3)] rounded-full flex items-center justify-center text-[#0cb9c1] font-semibold text-lg">
               {username.charAt(0)}
             </div>
             <div>
               <h3 className="font-medium text-gray-900">{username}</h3>
-              <p className="text-gray-600 text-sm">{category}</p>
+              <p className="text-gray-500 text-sm">{category}</p>
               <p className="text-gray-800 mt-1 font-medium">{work}</p>
             </div>
           </div>
@@ -176,7 +192,7 @@ export default function OrderCard({
                 <button
                   onClick={handleStatusChange}
                   disabled={isUpdatingStatus}
-                  className={`mt-2 px-3 py-1 text-xs bg-teal-500 text-white rounded-full hover:bg-teal-600 transition-colors ${
+                  className={`mt-2 px-3 py-1 text-xs bg-[#0cb9c1] text-white rounded-full hover:bg-[#0aa9b1] transition-colors ${
                     isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -188,11 +204,11 @@ export default function OrderCard({
             <p className="mt-2 text-gray-500 text-sm">Date: {date}</p>
             <div className="mt-3 flex items-center justify-end gap-2">
               <div className="flex items-center">
-                <span className="text-amber-500 mr-1">★</span>
+                <span className="text-[#0cb9c1] mr-1">★</span>
                 <span className="text-gray-600 text-sm">{reviewCount}</span>
               </div>
               <button 
-                className={`px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200 transition-colors ${
+                className={`px-3 py-1.5 bg-[#f2f2f2] text-gray-700 rounded-full hover:bg-[rgba(12,185,193,0.3)] hover:text-[#0cb9c1] transition-colors ${
                   loading ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
                 onClick={handleViewReviews}

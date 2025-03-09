@@ -153,10 +153,10 @@ export default function Sold() {
         {statuses.map((s) => (
           <button
             key={s}
-            className={`px-4 py-2 rounded-full transition-colors ${
+            className={`px-4 py-2 rounded-full transition-colors duration-300 ${
               statusFilter === s
-                ? 'bg-teal-500 text-white font-medium'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-[#0cb9c1] text-white font-medium shadow-md'
+                : 'bg-white text-gray-700 hover:bg-[rgba(12,185,193,0.3)] border border-gray-200'
             }`}
             onClick={() => setStatusFilter(s)}
           >
@@ -167,7 +167,7 @@ export default function Sold() {
 
       {loading && (
         <div className="flex justify-center items-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-teal-500" />
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#0cb9c1]" />
         </div>
       )}
 
@@ -179,7 +179,7 @@ export default function Sold() {
 
       {!loading && !error && orders.length === 0 && (
         <div className="text-center py-12">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto w-16 h-16 text-gray-300 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mx-auto w-16 h-16 text-[rgba(12,185,193,0.3)] mb-4">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <p className="text-gray-500">No orders found</p>
