@@ -21,6 +21,7 @@ export interface Review {
   rating: number;
   comment: string;
   createdAt: Date;
+  purchasedOrderid?: string;
 }
 
 // Define the Order type
