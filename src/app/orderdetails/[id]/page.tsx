@@ -1,4 +1,5 @@
 // D:\skill-bazaar\src\app\orderdetails\[id]\page.tsx
+//dis foro the order details page UI thing, chcanged UI and stuff
 "use client";
 import React, { useContext, useEffect, useState } from "react";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
@@ -74,11 +75,11 @@ const OrderDetailPage = () => {
     try {
       setActionInProgress(true);
       
-      // Log the request details
+      // request error stuff
       console.log('Sending request to:', `/api/orderdetails/${orderData.id}`);
       console.log('Request body:', { status: action === 'accept' ? 'ACCEPTED' : 'DECLINED' });
       
-      // Update order status
+      // update statuss
       const orderResponse = await fetch(`/api/orderdetails/${orderData.id}`, {  // Changed from /api/orders to /api/orderdetails
         method: 'PATCH',
         headers: {
@@ -89,7 +90,7 @@ const OrderDetailPage = () => {
         }),
       });
   
-      // Log the response
+      //response error stuff
       console.log('Response status:', orderResponse.status);
       const responseData = await orderResponse.json();
       console.log('Response data:', responseData);
@@ -220,139 +221,122 @@ const OrderDetailPage = () => {
     }
 
   };
-
-
   
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6 flex justify-center items-center">
-        Loading...
+      <div className="bg-[#f2f2f2] min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-6 flex justify-center items-center">
+          Loading...
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <div className="max-w-4xl mx-auto p-6 text-red-500">{error}</div>;
+    return (
+      <div className="bg-[#f2f2f2] min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-6 text-red-500">{error}</div>
+      </div>
+    );
   }
 
   if (!orderData) {
-    return <div className="max-w-4xl mx-auto p-6">No order found.</div>;
+    return (
+      <div className="bg-[#f2f2f2] min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-6">No order found.</div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6"
-      >
-        <ArrowLeft size={20} />
-        Back to Orders
-      </button>
+    <div className="bg-[#f2f2f2] min-h-screen w-full">
+      <div className="max-w-4xl mx-auto p-6">
+        <button
+          onClick={() => router.back()}
+          className="bg-[#0cb9c1] text-white px-4 py-2 rounded-md flex items-center gap-2 text-blue-500 hover:text-blue-600 mb-6 "
+        >
+          <ArrowLeft size={20} />
+          Back to Orders
+        </button>
 
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2 text-black">
-              {orderData.workTitle}
-            </h1>
-            <p className="text-lg mb-4 text-black">{orderData.description}</p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-green-600">
-              {orderData.rate}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2 text-black">
+                {orderData.workTitle}
+              </h1>
+              <p className="text-lg mb-4 text-black">{orderData.description}</p>
             </div>
-            <div className="text-gray-600">Category: {orderData.category}</div>
-            <div className="text-gray-600 mt-2">
-              Status: <span className="font-semibold">{orderData.status}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* {orderData.status === 'PENDING' && (
-          <div className="border-t border-gray-200 pt-6 flex gap-4 mb-6">
-            <button
-              onClick={() => handleOrderAction('accept')}
-              disabled={actionInProgress}
-              className={`flex-1 py-3 px-4 rounded-lg text-white text-center font-medium
-                ${actionInProgress 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-green-500 hover:bg-green-600 transition'
-                }`}
-            >
-              {actionInProgress ? 'Processing...' : 'Accept Order'}
-            </button>
-            <button
-              onClick={() => handleOrderAction('decline')}
-              disabled={actionInProgress}
-              className={`flex-1 py-3 px-4 rounded-lg text-white text-center font-medium
-                ${actionInProgress 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-red-500 hover:bg-red-600 transition'
-                }`}
-            >
-              {actionInProgress ? 'Processing...' : 'Decline Order'}
-            </button>
-          </div>
-        )} */}
-
-        <div className="border-t border-gray-200 pt-6 flex justify-between">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-2xl font-bold text-gray-600">Rating:</h2>
-            <span className="text-2xl text-yellow-500">
-              {orderData.averageRating}
-            </span>
-          </div>
-
-          <button
-            onClick={() => handlePayment(orderData.rate, orderData.id)}
-            className="w-1/3 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold transition duration-300 flex items-center justify-center gap-2"
-          >
-            Buy Now <ShoppingCart />
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-600">Reviews</h2>
-        <div className="space-y-6">
-          {orderData.Review.length > 0 ? (
-            orderData.Review.map((review) => (
-              <div
-                key={review.id}
-                className="border-b border-gray-200 last:border-0 pb-6"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                      {review.reviewer.image ? (
-                        <img
-                          src={review.reviewer.image}
-                          alt={review.reviewer.name || "User"}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-600">@</span>
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">
-                        {review.reviewer.name || "Anonymous User"}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-yellow-500 font-medium">
-                    Rating: {review.rating}/5
-                  </div>
-                </div>
-                <p className="text-gray-700 mt-2">{review.comment}</p>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-green-600">
+                {orderData.rate}
               </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center">No reviews yet</p>
-          )}
+              <div className="text-gray-600">Category: {orderData.category}</div>
+              <div className="text-gray-600 mt-2">
+                Status: <span className="font-semibold">{orderData.status}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 pt-6 flex justify-between">
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-2xl font-bold text-gray-600">Rating:</h2>
+              <span className="text-2xl text-yellow-500">
+                {orderData.averageRating}
+              </span>
+            </div>
+
+            <button
+              onClick={() => handlePayment(orderData.rate, orderData.id)}
+              className="w-1/3 bg-[#0cb9c1] hover:bg-[#0ba6ad] text-white py-3 rounded-lg text-lg font-semibold transition duration-300 flex items-center justify-center gap-2"
+            >
+              Buy Now <ShoppingCart />
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold mb-6 text-gray-600">Reviews</h2>
+          <div className="space-y-6">
+            {orderData.Review.length > 0 ? (
+              orderData.Review.map((review) => (
+                <div
+                  key={review.id}
+                  className="border-b border-gray-200 last:border-0 pb-6"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                        {review.reviewer.image ? (
+                          <img
+                            src={review.reviewer.image}
+                            alt={review.reviewer.name || "User"}
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-gray-600">@</span>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {review.reviewer.name || "Anonymous User"}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-yellow-500 font-medium">
+                      Rating: {review.rating}/5
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mt-2">{review.comment}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">No reviews yet</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
