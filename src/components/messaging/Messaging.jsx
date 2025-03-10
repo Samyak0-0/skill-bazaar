@@ -249,7 +249,7 @@ export default function Messaging() {
                   gap: "1rem",
                 }}
               >
-                <Paperclip size={22} className="text-white cursor-pointer" />
+                <Paperclip size={22} className="text-black cursor-pointer" />
                 {file.name}
               </div>
             )}
@@ -284,13 +284,13 @@ export default function Messaging() {
                   <label htmlFor="image">
                     <Paperclip
                       size={22}
-                      className="text-white cursor-pointer"
+                      className="text-black cursor-pointer"
                     />
                   </label>
                 </button>
               </div>
               <button onClick={sendMessage} style={{ padding: "0.5rem" }}>
-                <Send size={25} color="white" />
+                <Send size={25} color="black" />
               </button>
             </div>
           </div>
